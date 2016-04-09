@@ -9,12 +9,23 @@ use std::ops::{
     DivAssign
 };
 
+// use std::num::{
+//     sqrt,
+//     abs
+// };
+
 use std::convert::{
     Into
 };
 
 pub trait Vec <VecType, Output> {
-    fn dot(&self, o: VecType) -> Output;
+    fn dot<'a, 'b>(&'a self, o: &'b VecType) -> Output;
+    fn cross<'a, 'b>(&'a self, o: &'b VecType) -> VecType;
+    fn length<'a>(&'a self) -> Output;
+    fn absolute_length<'a>(&'a self) -> Output;
+    fn square_length<'a>(&'a self) -> Output;
+    fn normalize<'a>(&'a mut self);
+    fn normalized<'a>(&'a self) -> VecType;
 }
 
 #[derive(Debug)]
@@ -148,8 +159,44 @@ impl<'b, T, F> DivAssign<&'b F> for Vec3<T> where T: DivAssign + Copy, F: Into<T
     }
 }
 
-impl<'a, 'b, T> Vec<&'b Vec3<T>, T> for &'a Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Copy {
-    fn dot(&self, o: &'b Vec3<T>) -> T {
+impl<T> Vec<Vec3<T>, T> for Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Sub<Output=T> + Div<Output=T> + DivAssign + Into<f64> + From<f64> + Copy {
+    fn dot<'a, 'b>(&'a self, o: &'b Vec3<T>) -> T {
         self.x * o.x + self.y * o.y + self.z * o.z
+    }
+
+    fn cross<'a, 'b>(&'a self, o: &'b Vec3<T>) -> Vec3<T> {
+        Vec3 {
+            x: self.y * o.z - self.z * o.y,
+            y: self.z * o.x - self.x * o.z,
+            z: self.x * o.y - self.y * o.x
+        }
+    }
+
+    fn length<'a>(&'a self) -> T {
+        ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into()
+    }
+
+    fn absolute_length<'a>(&'a self) -> T {
+        (self.x.into().abs() + self.y.into().abs() + self.z.into().abs()).into()
+    }
+
+    fn square_length<'a>(&'a self) -> T {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    fn normalize<'a>(&'a mut self) {
+        let len = ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into();
+        self.x /= len;
+        self.y /= len;
+        self.z /= len;
+    }
+
+    fn normalized<'a>(&'a self) -> Vec3<T> {
+        let len = ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into();
+        Vec3 {
+            x: self.x / len,
+            y: self.y / len,
+            z: self.z / len
+        }
     }
 }
