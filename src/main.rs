@@ -3,6 +3,7 @@ extern crate gtk;
 // use gtk::prelude::*
 pub mod ui;
 pub mod math;
+pub mod render;
 use math::vector::Vec;
 
 fn main() {
@@ -22,15 +23,21 @@ fn main() {
         z: 0.0
     };
     let sc1 = 45.0;
-
+    let ry1 = render::ray::Ray3 {
+        o:    v1.clone(),
+        d:    v2.clone(),
+        invd: v3.clone()
+    };
     // println!("{:?}", ((v1 + v2) * 3.9).dot(v2));
     v3 += &(&v1 + &v2);
+
     println!("{:?}", &v3 * &sc1);
     println!("{:?}", v3);
     println!("{:?}", sc1);
     println!("{:?}", (&v3).dot(&v1));
     println!("{:?}", v1);
     println!("{:?}", v3);
+    println!("{:?}", ry1);
 
     let ui_manager = match ui::UiManager::new() {
         Some(u) => u,

@@ -18,17 +18,24 @@ use std::convert::{
     Into
 };
 
-pub trait Vec <VecType, Output> {
-    fn dot<'a, 'b>(&'a self, o: &'b VecType) -> Output;
-    fn cross<'a, 'b>(&'a self, o: &'b VecType) -> VecType;
+pub enum Axis {
+    X,
+    Y,
+    Z,
+    W,
+}
+
+pub trait Vec <Output> {
+    fn dot<'a, 'b>(&'a self, o: &'b Self) -> Output;
+    fn cross<'a, 'b>(&'a self, o: &'b Self) -> Self;
     fn length<'a>(&'a self) -> Output;
     fn absolute_length<'a>(&'a self) -> Output;
     fn square_length<'a>(&'a self) -> Output;
     fn normalize<'a>(&'a mut self);
-    fn normalized<'a>(&'a self) -> VecType;
+    fn normalized<'a>(&'a self) -> Self;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vec3<T> {
     pub x: T,
     pub y: T,
@@ -75,10 +82,10 @@ impl<'a, T> SubAssign<&'a Vec3<T>> for Vec3<T> where T: SubAssign + Copy {
     }
 }
 
-impl<'a, T> Mul for &'a Vec3<T> where T: Mul<Output=T> + Copy {
+impl<'a, 'b, T> Mul<&'b Vec3<T>> for &'a Vec3<T> where T: Mul<Output=T> + Copy {
     type Output = Vec3<T>;
 
-    fn mul(self, other: &'a Vec3<T>) -> Vec3<T> {
+    fn mul(self, other: &'b Vec3<T>) -> Vec3<T> {
         Vec3 {
             x: self.x * other.x,
             y: self.y * other.y,
@@ -117,10 +124,10 @@ impl<'b, T, F> MulAssign<&'b F> for Vec3<T> where T: MulAssign + Copy, F: Into<T
     }
 }
 
-impl<'a, T> Div for &'a Vec3<T> where T: Div<Output=T> + Copy {
+impl<'a, 'b, T> Div<&'b Vec3<T>> for &'a Vec3<T> where T: Div<Output=T> + Copy {
     type Output = Vec3<T>;
 
-    fn div(self, other: &'a Vec3<T>) -> Vec3<T> {
+    fn div(self, other: &'b Vec3<T>) -> Vec3<T> {
         Vec3 {
             x: self.x / other.x,
             y: self.y / other.y,
@@ -159,7 +166,7 @@ impl<'b, T, F> DivAssign<&'b F> for Vec3<T> where T: DivAssign + Copy, F: Into<T
     }
 }
 
-impl<T> Vec<Vec3<T>, T> for Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Sub<Output=T> + Div<Output=T> + DivAssign + Into<f64> + From<f64> + Copy {
+impl<T> Vec<T> for Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Sub<Output=T> + Div<Output=T> + DivAssign + Into<f64> + From<f64> + Copy {
     fn dot<'a, 'b>(&'a self, o: &'b Vec3<T>) -> T {
         self.x * o.x + self.y * o.y + self.z * o.z
     }
