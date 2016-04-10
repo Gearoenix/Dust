@@ -1,13 +1,16 @@
-
 extern crate cairo;
 extern crate gtk;
 
 use std::f64::consts::PI;
 
-use ::gtk::prelude::*;
-use ::gtk::DrawingArea;
+use gtk::prelude::*;
+use gtk::DrawingArea;
 
-use self::cairo::Context;
+use cairo::Context;
+
+use std::io::prelude::*;
+use std::io::{BufReader, SeekFrom};
+use std::fs::File;
 
 pub struct MainWindow {
     win : gtk::Window,
@@ -28,6 +31,17 @@ impl MainWindow {
         let drawing_area = Box::new(DrawingArea::new)();
 
         drawing_area.connect_draw( |_, cr| {
+
+            let f = File::open("/home/thany/1.png").unwrap();
+            let mut reader = BufReader::new(f);
+            let pngsize = reader.seek(SeekFrom::End(0)).unwrap() as usize;
+            reader.seek(SeekFrom::Start(0));
+            let mut data = Box::new(Vec::<u8>::new)();
+            data.resize(pngsize, 0u8);
+            let len = reader.read(&mut data).unwrap();
+
+            println!("First line is {} bytes long", len);
+
             cr.set_dash(&[3., 2., 1.], 1.);
             assert_eq!(cr.get_dash(), (vec![3., 2., 1.], 1.));
 
