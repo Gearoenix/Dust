@@ -32,6 +32,8 @@ impl MainWindow {
 
         drawing_area.connect_draw( |_, cr| {
 
+
+
             let f = File::open("/home/thany/1.png").unwrap();
             let mut reader = BufReader::new(f);
             let pngsize = reader.seek(SeekFrom::End(0)).unwrap() as usize;
