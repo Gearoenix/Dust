@@ -2,7 +2,7 @@ extern crate gtk;
 
 mod main_window;
 
-use gtk::prelude::*;
+use self::gtk::prelude::*;
 
 pub struct UiManager {
     win: main_window::MainWindow,

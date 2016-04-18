@@ -3,8 +3,8 @@ name = "dust"
 version = "0.0.1"
 authors = ["Hossein Noroozpour Thany Abady"]
 
-[dependencies.cairo-rs]
-version = "*"
-
-[dependencies.gtk]
-version = "*"
+[dependencies]
+cairo-rs = "*"
+gtk = "*"
+image = "*"
+gdk-pixbuf = "*"

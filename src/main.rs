@@ -1,7 +1,3 @@
-extern crate cairo;
-extern crate gtk;
-
-// use gtk::prelude::*
 pub mod ui;
 pub mod math;
 pub mod render;
