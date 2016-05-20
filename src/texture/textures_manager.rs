@@ -41,11 +41,15 @@ impl TexturesManager {
 
     pub fn read_table(&mut self, s: &mut Stream) {
         let texture_count = s.read(&0u16);
+        println!("Texture count: {:?}", texture_count);
         for _ in 0..texture_count {
             let names_count = s.read(&0u8);
+            println!("Texture name count: {:?}", names_count);
             let mut names = HashSet::new();
             for _ in 0..names_count {
-                names.insert(s.read_string());
+                let name = s.read_string();
+                println!("Texture name: {:?}", name);
+                names.insert(name);
             }
             let index = s.read(&0u16);
             let texture_type: TextureType;

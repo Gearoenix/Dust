@@ -40,11 +40,13 @@ fn main() {
     println!("{:?}", v3);
     println!("{:?}", ry1);
 
-    let mut file = io::file::Stream::new(&("1.gx3d".to_string()));
+    let mut file = io::file::Stream::new(&("/home/thany/Temporary/1.gx3d".to_string()));
 
     let mut textures_manager = texture::textures_manager::TexturesManager::new();
     let mut scenes_manager = render::scenes_manager::ScenesManager::new();
     textures_manager.read_table(&mut file);
+    scenes_manager.read_table(&mut file);
+    let mut scene = scenes_manager.get_scene(&"Scene".to_string(), &mut file);
 
     let ui_manager = match ui::UiManager::new() {
         Some(u) => u,

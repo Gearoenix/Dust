@@ -11,14 +11,21 @@ use ::math::vector::{
 use ::math::triangle::Triangle;
 use ::render::geometry::BasicGeometry;
 
-struct Scene {
+pub struct Scene {
     pub gs: Vec<BasicGeometry>,
     pub gm: HashMap<String, usize>,
     // pub gt: TODO KDTree for geometries in scene
 }
 
 impl Scene {
-    fn read(&mut self, s: &mut Stream) {
+    pub fn new() -> Scene {
+        Scene {
+            gs: Vec::new(),
+            gm: HashMap::new(),
+        }
+    }
+
+    pub fn read(&mut self, s: &mut Stream) {
         let objects_count = s.read(&0u16);
         for _ in 0..objects_count {
             s.read(&0u8);
