@@ -1,33 +1,32 @@
-use std::ops::{
-    Sub,
-    Mul
-};
-use std::cmp::{
+use ::math::num::{
     min,
-    max
+    max,
 };
 
 use ::math::vector::{
     Vec3,
-    Axis
+    Axis,
+    MathVector,
+    VectorElement,
 };
-use ::render::ray::Ray3;
 
-trait ExpandableToOther {
+use ::math::ray::Ray3;
+
+pub trait ExpandableToOther {
     fn expand(&mut self, o: &Self);
 }
 
-trait ExpandableToPoint3<T> {
+pub trait ExpandableToPoint3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
     fn expand(&mut self, o: &Vec3<T>);
 }
 
-#[derive(Debug, Clone)]
-pub struct AABBox3<T> {
+#[derive(Debug, Clone, Copy)]
+pub struct AABBox3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
     pub blf: Vec3<T>,
     pub trr: Vec3<T>
 }
 
-impl<T> ExpandableToOther for AABBox3<T> where T: Ord + Copy {
+impl<T> ExpandableToOther for AABBox3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
 
     fn expand(&mut self, o : &Self) {
         if o.blf.x < self.blf.x { self.blf.x = o.blf.x; }
@@ -40,7 +39,7 @@ impl<T> ExpandableToOther for AABBox3<T> where T: Ord + Copy {
     }
 }
 
-impl<T> ExpandableToPoint3<T> for AABBox3<T> where T: Ord + Copy {
+impl<T> ExpandableToPoint3<T> for AABBox3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
 
     fn expand(&mut self, p : &Vec3<T>) {
         if p.x < self.blf.x { self.blf.x = p.x; }
@@ -49,18 +48,25 @@ impl<T> ExpandableToPoint3<T> for AABBox3<T> where T: Ord + Copy {
     }
 }
 
-impl<T> AABBox3<T> where T: Sub<Output=T> + Mul<Output=T> + Copy + Ord {
+impl<T> AABBox3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
 
-    fn get_longest_axis(&self) -> Axis {
-        let diff = &(self.trr) - &(self.blf); // TODO check for occurance, if it is too much store it in box
+    pub fn new() -> AABBox3<T> {
+        AABBox3 {
+            blf: Vec3::new(T::zero()),
+            trr: Vec3::new(T::zero()),
+        }
+    }
+
+    pub fn get_longest_axis(&self) -> Axis {
+        let diff = self.trr - self.blf; // TODO check for occurance, if it is too much store it in box
         if diff.x > diff.y && diff.x > diff.z { return Axis::X; }
         if diff.y > diff.x && diff.y > diff.z { return Axis::Y; }
         return Axis::Z;
     }
 
     // Check if ray intersects with box. Returns true/false and stores distance in t
-    fn intersection(&self, r: &Ray3<T>) -> (bool, T) {
-        
+    pub fn intersection(&self, r: &Ray3<T>) -> (bool, T) {
+
         let tx1 = (self.blf.x - r.o.x) * r.invd.x;
         let tx2 = (self.trr.x - r.o.x) * r.invd.x;
 

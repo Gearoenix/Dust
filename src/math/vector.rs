@@ -1,3 +1,5 @@
+extern crate num;
+
 use std::ops::{
     Add,
     Sub,
@@ -8,15 +10,14 @@ use std::ops::{
     MulAssign,
     DivAssign
 };
-
-// use std::num::{
-//     sqrt,
-//     abs
-// };
-
-use std::convert::{
-    Into
+use std::num::{
+    Zero,
+    One,
 };
+use std::fmt::Debug;
+
+use ::io::file::Stream;
+use ::math::num::Number;
 
 pub enum Axis {
     X,
@@ -25,153 +26,166 @@ pub enum Axis {
     W,
 }
 
-pub trait Vec <Output> {
-    fn dot<'a, 'b>(&'a self, o: &'b Self) -> Output;
-    fn cross<'a, 'b>(&'a self, o: &'b Self) -> Self;
-    fn length<'a>(&'a self) -> Output;
-    fn absolute_length<'a>(&'a self) -> Output;
-    fn square_length<'a>(&'a self) -> Output;
-    fn normalize<'a>(&'a mut self);
-    fn normalized<'a>(&'a self) -> Self;
+pub trait VectorElement:
+        Add<Output=Self> +
+        Sub<Output=Self> +
+        Mul<Output=Self> +
+        Div<Output=Self> +
+        AddAssign +
+        SubAssign +
+        MulAssign +
+        DivAssign +
+        Zero +
+        One +
+        num::NumCast +
+        Number +
+        PartialOrd +
+        Copy +
+        Clone +
+        Debug {
 }
 
-#[derive(Debug, Clone)]
-pub struct Vec3<T> {
+impl<T> VectorElement for T where
+    T:
+        Add<Output=T> +
+        Sub<Output=T> +
+        Mul<Output=T> +
+        Div<Output=T> +
+        AddAssign +
+        SubAssign +
+        MulAssign +
+        DivAssign +
+        Zero +
+        One +
+        num::NumCast +
+        Number +
+        PartialOrd +
+        Copy +
+        Clone +
+        Debug {
+
+}
+
+pub trait MathVector <ElementType>:
+        Sized +
+        Add<Output=Self> +
+        AddAssign +
+        Sub<Output=Self> +
+        SubAssign +
+        Mul<ElementType, Output=Self> +
+        MulAssign<ElementType> +
+        Div<ElementType, Output=Self> +
+        DivAssign<ElementType>
+    where ElementType: VectorElement {
+    fn new(e: ElementType) -> Self;
+    fn dot(&self, o: &Self) -> ElementType;
+    fn cross(&self, o: &Self) -> Self;
+    fn length(&self) -> ElementType;
+    fn absolute_length(&self) -> ElementType;
+    fn square_length(&self) -> ElementType;
+    fn normalize(&mut self);
+    fn normalized(&self) -> Self;
+    fn read(&mut self, s: &mut Stream);
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Vec3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-impl<'a, T> Add for &'a Vec3<T> where T: Add<Output=T> + Copy {
-    type Output = Vec3<T>;
+macro_rules! as_expr { ($e:expr) => {$e} }
 
-    fn add(self, other: &'a Vec3<T>) -> Vec3<T> {
+macro_rules! op3 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra for Vec3<T> where T: VectorElement {
+            type Output = Vec3<T>;
+            fn $func(self, other: Vec3<T>) -> Vec3<T> {
+                Vec3 {
+                    x: as_expr!(self.x $opt other.x),
+                    y: as_expr!(self.y $opt other.y),
+                    z: as_expr!(self.z $opt other.z),
+                }
+            }
+        }
+    )
+}
+
+macro_rules! sop3 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra<T> for Vec3<T> where T: VectorElement {
+            type Output = Vec3<T>;
+            fn $func(self, other: T) -> Vec3<T> {
+                Vec3 {
+                    x: as_expr!(self.x $opt other),
+                    y: as_expr!(self.y $opt other),
+                    z: as_expr!(self.z $opt other),
+                }
+            }
+        }
+    )
+}
+
+macro_rules! opasg3 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra for Vec3<T> where T: VectorElement {
+            fn $func(&mut self, other: Vec3<T>) {
+                as_expr!(self.x $opt other.x);
+                as_expr!(self.y $opt other.y);
+                as_expr!(self.z $opt other.z);
+            }
+        }
+    )
+}
+
+macro_rules! sopasg3 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra<T> for Vec3<T> where T: VectorElement {
+            fn $func(&mut self, other: T) {
+                as_expr!(self.x $opt other);
+                as_expr!(self.y $opt other);
+                as_expr!(self.z $opt other);
+            }
+        }
+    )
+}
+
+op3!(add, Add, +);
+op3!(sub, Sub, -);
+op3!(mul, Mul, *);
+op3!(div, Div, /);
+
+sop3!(add, Add, +);
+sop3!(sub, Sub, -);
+sop3!(mul, Mul, *);
+sop3!(div, Div, /);
+
+opasg3!(add_assign, AddAssign, +=);
+opasg3!(sub_assign, SubAssign, -=);
+opasg3!(mul_assign, MulAssign, *=);
+opasg3!(div_assign, DivAssign, /=);
+
+sopasg3!(add_assign, AddAssign, +=);
+sopasg3!(sub_assign, SubAssign, -=);
+sopasg3!(mul_assign, MulAssign, *=);
+sopasg3!(div_assign, DivAssign, /=);
+
+impl<T> MathVector<T> for Vec3<T> where T: VectorElement {
+
+    fn new(e: T) -> Vec3<T> {
         Vec3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
+            x: e,
+            y: e,
+            z: e,
         }
     }
-}
 
-impl<'a, T> AddAssign<&'a Vec3<T>> for Vec3<T> where T: AddAssign + Copy {
-    fn add_assign(&mut self, other: &'a Vec3<T>) {
-        self.x += other.x;
-        self.y += other.y;
-        self.z += other.z;
-    }
-}
-
-impl<'a, T> Sub for &'a Vec3<T> where T: Sub<Output=T> + Copy {
-    type Output = Vec3<T>;
-
-    fn sub(self, other: &'a Vec3<T>) -> Vec3<T> {
-        Vec3 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-
-impl<'a, T> SubAssign<&'a Vec3<T>> for Vec3<T> where T: SubAssign + Copy {
-    fn sub_assign(&mut self, other: &'a Vec3<T>) {
-        self.x -= other.x;
-        self.y -= other.y;
-        self.z -= other.z;
-    }
-}
-
-impl<'a, 'b, T> Mul<&'b Vec3<T>> for &'a Vec3<T> where T: Mul<Output=T> + Copy {
-    type Output = Vec3<T>;
-
-    fn mul(self, other: &'b Vec3<T>) -> Vec3<T> {
-        Vec3 {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            z: self.z * other.z,
-        }
-    }
-}
-
-impl<'a, 'b, T, F> Mul<&'b F> for &'a Vec3<T> where T: Mul<Output=T> + Copy, F: Into<T> + Copy {
-    type Output = Vec3<T>;
-
-    fn mul(self, other: &'b F) -> Vec3<T> {
-        let ast: T = (*other).into();
-        Vec3 {
-            x: self.x * ast,
-            y: self.y * ast,
-            z: self.z * ast,
-        }
-    }
-}
-
-impl<'a, T> MulAssign<&'a Vec3<T>> for Vec3<T> where T: MulAssign + Copy {
-    fn mul_assign(&mut self, other: &'a Vec3<T>) {
-        self.x *= other.x;
-        self.y *= other.y;
-        self.z *= other.z;
-    }
-}
-
-impl<'b, T, F> MulAssign<&'b F> for Vec3<T> where T: MulAssign + Copy, F: Into<T> + Copy {
-    fn mul_assign(&mut self, other: &'b F) {
-        let ast: T = (*other).into();
-        self.x *= ast;
-        self.y *= ast;
-        self.z *= ast;
-    }
-}
-
-impl<'a, 'b, T> Div<&'b Vec3<T>> for &'a Vec3<T> where T: Div<Output=T> + Copy {
-    type Output = Vec3<T>;
-
-    fn div(self, other: &'b Vec3<T>) -> Vec3<T> {
-        Vec3 {
-            x: self.x / other.x,
-            y: self.y / other.y,
-            z: self.z / other.z,
-        }
-    }
-}
-
-impl<'a, 'b, T, F> Div<&'b F> for &'a Vec3<T> where T: Div<Output=T> + Copy, F: Into<T> + Copy {
-    type Output = Vec3<T>;
-
-    fn div(self, other: &'b F) -> Vec3<T> {
-        let ast: T = (*other).into();
-        Vec3 {
-            x: self.x / ast,
-            y: self.y / ast,
-            z: self.z / ast,
-        }
-    }
-}
-
-impl<'a, T> DivAssign<&'a Vec3<T>> for Vec3<T> where T: DivAssign + Copy {
-    fn div_assign(&mut self, other: &'a Vec3<T>) {
-        self.x /= other.x;
-        self.y /= other.y;
-        self.z /= other.z;
-    }
-}
-
-impl<'b, T, F> DivAssign<&'b F> for Vec3<T> where T: DivAssign + Copy, F: Into<T> + Copy {
-    fn div_assign(&mut self, other: &F) {
-        let ast: T = (*other).into();
-        self.x /= ast;
-        self.y /= ast;
-        self.z /= ast;
-    }
-}
-
-impl<T> Vec<T> for Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Sub<Output=T> + Div<Output=T> + DivAssign + Into<f64> + From<f64> + Copy {
-    fn dot<'a, 'b>(&'a self, o: &'b Vec3<T>) -> T {
+    fn dot(&self, o: &Vec3<T>) -> T {
         self.x * o.x + self.y * o.y + self.z * o.z
     }
 
-    fn cross<'a, 'b>(&'a self, o: &'b Vec3<T>) -> Vec3<T> {
+    fn cross(&self, o: &Vec3<T>) -> Vec3<T> {
         Vec3 {
             x: self.y * o.z - self.z * o.y,
             y: self.z * o.x - self.x * o.z,
@@ -179,31 +193,167 @@ impl<T> Vec<T> for Vec3<T> where T: Mul<Output=T> + Add<Output=T> + Sub<Output=T
         }
     }
 
-    fn length<'a>(&'a self) -> T {
-        ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into()
+    fn length(&self) -> T {
+        (self.x * self.x + self.y * self.y + self.z * self.z).square_root()
     }
 
-    fn absolute_length<'a>(&'a self) -> T {
-        (self.x.into().abs() + self.y.into().abs() + self.z.into().abs()).into()
+    fn absolute_length(&self) -> T {
+        self.x.absolute() + self.y.absolute() + self.z.absolute()
     }
 
-    fn square_length<'a>(&'a self) -> T {
+    fn square_length(&self) -> T {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    fn normalize<'a>(&'a mut self) {
-        let len = ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into();
+    fn normalize(&mut self) {
+        let len = (self.x * self.x + self.y * self.y + self.z * self.z).square_root();
         self.x /= len;
         self.y /= len;
         self.z /= len;
     }
 
-    fn normalized<'a>(&'a self) -> Vec3<T> {
-        let len = ((self.x * self.x + self.y * self.y + self.z * self.z).into()).sqrt().into();
+    fn normalized(&self) -> Vec3<T> {
+        let len = (self.x * self.x + self.y * self.y + self.z * self.z).square_root();
         Vec3 {
             x: self.x / len,
             y: self.y / len,
             z: self.z / len
         }
+    }
+
+    fn read(&mut self, s: &mut Stream) {
+        self.x = s.read::<T>(&T::zero());
+        self.y = s.read::<T>(&T::zero());
+        self.z = s.read::<T>(&T::zero());
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Vec2<T> where T: VectorElement, Vec2<T>: MathVector<T> {
+    pub x: T,
+    pub y: T,
+}
+
+macro_rules! op2 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra for Vec2<T> where T: VectorElement {
+            type Output = Vec2<T>;
+            fn $func(self, other: Vec2<T>) -> Vec2<T> {
+                Vec2 {
+                    x: as_expr!(self.x $opt other.x),
+                    y: as_expr!(self.y $opt other.y),
+                }
+            }
+        }
+    )
+}
+
+macro_rules! sop2 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra<T> for Vec2<T> where T: VectorElement {
+            type Output = Vec2<T>;
+            fn $func(self, other: T) -> Vec2<T> {
+                Vec2 {
+                    x: as_expr!(self.x $opt other),
+                    y: as_expr!(self.y $opt other),
+                }
+            }
+        }
+    )
+}
+
+macro_rules! opasg2 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra for Vec2<T> where T: VectorElement {
+            fn $func(&mut self, other: Vec2<T>) {
+                as_expr!(self.x $opt other.x);
+                as_expr!(self.y $opt other.y);
+            }
+        }
+    )
+}
+
+macro_rules! sopasg2 {
+    ($func:ident, $tra:ident, $opt:tt) => (
+        impl<T> $tra<T> for Vec2<T> where T: VectorElement {
+            fn $func(&mut self, other: T) {
+                as_expr!(self.x $opt other);
+                as_expr!(self.y $opt other);
+            }
+        }
+    )
+}
+
+op2!(add, Add, +);
+op2!(sub, Sub, -);
+op2!(mul, Mul, *);
+op2!(div, Div, /);
+
+sop2!(add, Add, +);
+sop2!(sub, Sub, -);
+sop2!(mul, Mul, *);
+sop2!(div, Div, /);
+
+opasg2!(add_assign, AddAssign, +=);
+opasg2!(sub_assign, SubAssign, -=);
+opasg2!(mul_assign, MulAssign, *=);
+opasg2!(div_assign, DivAssign, /=);
+
+sopasg2!(add_assign, AddAssign, +=);
+sopasg2!(sub_assign, SubAssign, -=);
+sopasg2!(mul_assign, MulAssign, *=);
+sopasg2!(div_assign, DivAssign, /=);
+
+impl<T> MathVector<T> for Vec2<T> where T: VectorElement {
+
+    fn new(e: T) -> Vec2<T> {
+        Vec2 {
+            x: e,
+            y: e,
+        }
+    }
+
+    fn dot(&self, o: &Vec2<T>) -> T {
+        self.x * o.x + self.y * o.y
+    }
+
+    fn cross(&self, o: &Vec2<T>) -> Vec2<T> {
+        println!("{:?}", o);
+        println!("In 2D we can not have a cross product");
+        Vec2 {
+            x: T::zero(),
+            y: T::zero(),
+        }
+    }
+
+    fn length(&self) -> T {
+        (self.x * self.x + self.y * self.y).square_root()
+    }
+
+    fn absolute_length(&self) -> T {
+        self.x.absolute() + self.y.absolute()
+    }
+
+    fn square_length(&self) -> T {
+        self.x * self.x + self.y * self.y
+    }
+
+    fn normalize(&mut self) {
+        let len = (self.x * self.x + self.y * self.y).square_root();
+        self.x /= len;
+        self.y /= len;
+    }
+
+    fn normalized(&self) -> Vec2<T> {
+        let len = (self.x * self.x + self.y * self.y).square_root();
+        Vec2 {
+            x: self.x / len,
+            y: self.y / len,
+        }
+    }
+
+    fn read(&mut self, s: &mut Stream) {
+        self.x = s.read::<T>(&T::zero());
+        self.y = s.read::<T>(&T::zero());
     }
 }
