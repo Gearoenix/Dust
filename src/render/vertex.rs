@@ -1,3 +1,5 @@
+extern crate num;
+
 use ::math::vector::{
     Vec3,
     Vec2,
@@ -87,9 +89,9 @@ impl<T> PosNrm<T> where T: VectorElement {
     }
 
     pub fn read(s: &mut Stream) -> PosNrm<T> {
-        let mut pos = Vec3::new(T::zero());
+        let mut pos = Vec3::new(num::cast::<i8, T>(0).unwrap());
         pos.read(s);
-        let mut nrm = Vec3::new(T::zero());
+        let mut nrm = Vec3::new(num::cast::<i8, T>(0).unwrap());
         nrm.read(s);
         PosNrm {
             pos: pos,

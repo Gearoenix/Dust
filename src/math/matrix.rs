@@ -1,3 +1,5 @@
+extern crate num;
+
 use std::ops::{
     Add,
     Sub,
@@ -31,7 +33,7 @@ pub struct Mat4x4<E> {
 impl<E> Mat4x4<E> where E: VectorElement {
     pub fn new() -> Mat4x4<E> {
         Mat4x4 {
-            data: [[E::zero(); 4]; 4],
+            data: [[num::cast(0).unwrap(); 4]; 4],
         }
     }
 }
@@ -40,7 +42,7 @@ impl<E> Mat for Mat4x4<E> where E: VectorElement {
     fn read(&mut self, s: &mut Stream) {
         for i in 0..4 {
             for j in 0..4 {
-                self.data[j][i] = s.read(&E::zero());
+                self.data[j][i] = s.read(&num::cast(0).unwrap());
             }
         }
     }
@@ -60,10 +62,10 @@ impl<E> Mul<Vec3<E>> for Mat4x4<E> where E: VectorElement {
 impl<E> Mul<Mat4x4<E>> for Mat4x4<E> where E: VectorElement {
     type Output = Mat4x4<E>;
     fn mul(self, o: Mat4x4<E>) -> Mat4x4<E> {
-        let mut m: Mat4x4<E>;
+        let mut m = Mat4x4::new();
         for i in 0..4 {
             for j in 0..4 {
-                m.data[i][j] = E::zero();
+                m.data[i][j] = num::cast(0).unwrap();
                 for k in 0..4 {
                     m.data[i][j] += self.data[i][k] * o.data[k][j];
                 }

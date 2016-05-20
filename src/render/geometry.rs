@@ -6,7 +6,14 @@ use ::math::vector::{
     MathVector,
     VectorElement,
 };
-use ::math::aabbox::AABBox3;
+use ::math::aabbox::{
+    AABBox3,
+    ExpandableToPoint3,
+};
+use ::math::matrix::{
+    Mat,
+    Mat4x4,
+};
 use ::math::ray::Ray3;
 use ::math::triangle::Triangle;
 use ::math::kdtree::KDNode;
@@ -25,7 +32,7 @@ use ::io::file::Stream;
 pub struct BasicGeometry {
     pub ms: Vec<Box<Mesh>>,
     pub mm: HashMap<String, usize>,
-    pub positon: Vec3<f32>,
+    pub position: Vec3<f32>,
     pub transform: Mat4x4<f32>,
     // TODO add kdtree for your meshes
 }
@@ -35,12 +42,12 @@ impl BasicGeometry {
         BasicGeometry {
             ms: Vec::new(),
             mm: HashMap::new(),
-            position: Vec3::new(0f32);
-            transform: Mat4x4::new();
+            position: Vec3::new(0f32),
+            transform: Mat4x4::new(),
         }
     }
 
-    pub fn read<E>(&mut self, s: &mut Stream) -> AABBox3<E> where E: VectorElement {
+    pub fn read(&mut self, s: &mut Stream) -> AABBox3<f32> {
         let meshes_count = s.read(&0u8);
         for _ in 0..meshes_count {
             let mesh_index = self.ms.len();
@@ -56,7 +63,30 @@ impl BasicGeometry {
             self.ms.push(mesh);
             self.mm.insert(mesh_name, mesh_index);
         }
-        
+        self.transform.read(s);
+        self.position.read(s);
+        s.read(&0f32);
+        {
+            let vertex_count = (s.read(&0u32) / 3u32) as usize;
+            let mut vs = Vec::new();
+            let mut aabb = AABBox3::new();
+            vs.resize(vertex_count, Vec3::new(0f32));
+            for i in 0..vertex_count {
+                vs[i].read(s);
+                aabb.expand(&vs[i]);
+            }
+            let triangles_count = (s.read(&0u32) / 3) as usize;
+            let mut indices = Vec::new();
+            indices.resize(triangles_count, [0usize; 3]);
+            for i in 0..triangles_count {
+                indices[i] = [
+                    s.read(&0u32) as usize,
+                    s.read(&0u32) as usize,
+                    s.read(&0u32) as usize,
+                ];
+            }
+            aabb
+        }
     }
 }
 

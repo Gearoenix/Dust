@@ -1,8 +1,8 @@
 # Dust
-A ray tracing application implemented in Rust.
+A ray tracing engine implemented in Rust.
 It is a work undered progress.
 
-This program is using Gearoenix 3D file format as its data intry.
+This program is using Gearoenix 3D file format as its input data.
 
 ## TODO
 * Rendering A simple scene with sun in it.

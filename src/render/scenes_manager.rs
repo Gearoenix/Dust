@@ -24,7 +24,7 @@ impl ScenesManager {
     }
 
     pub fn get_scene(&self, name: &String, s: &mut Stream) {
-        s.seek(SeekFrom::start(self.name_index[name]));
+        s.reader.seek(SeekFrom::Start(self.name_index[name]));
 
     }
 }

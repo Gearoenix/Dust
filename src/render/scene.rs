@@ -30,16 +30,25 @@ impl Scene {
             let name = s.read_string();
             match object_type {
                 1 => {
-                    // let mut g = BasicGeometry::new();
-                    // g.read::<f64>();
-                    // gs.insert(name, );
+                    let mut g = BasicGeometry::new();
+                    g.read(s);
+                    self.gm.insert(name, self.gs.len());
+                    self.gs.push(g);
                 }
-                4 => {}
-                5 => {}
+                4 => {
+                    panic!("Cameras are not supported yet.");
+                }
+                5 => {
+                    panic!("Sun are not supported yet.");
+                }
                 _ => {
                     panic!("Try to import unknown object type.");
                 }
             }
+        }
+        let copy_geoes_count = s.read(&0u16);
+        if copy_geoes_count > 1 {
+            panic!("Copy geometries are not supported yet.");
         }
     }
 

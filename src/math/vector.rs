@@ -10,10 +10,6 @@ use std::ops::{
     MulAssign,
     DivAssign
 };
-use std::num::{
-    Zero,
-    One,
-};
 use std::fmt::Debug;
 
 use ::io::file::Stream;
@@ -35,8 +31,6 @@ pub trait VectorElement:
         SubAssign +
         MulAssign +
         DivAssign +
-        Zero +
-        One +
         num::NumCast +
         Number +
         PartialOrd +
@@ -55,8 +49,6 @@ impl<T> VectorElement for T where
         SubAssign +
         MulAssign +
         DivAssign +
-        Zero +
-        One +
         num::NumCast +
         Number +
         PartialOrd +
@@ -222,9 +214,9 @@ impl<T> MathVector<T> for Vec3<T> where T: VectorElement {
     }
 
     fn read(&mut self, s: &mut Stream) {
-        self.x = s.read::<T>(&T::zero());
-        self.y = s.read::<T>(&T::zero());
-        self.z = s.read::<T>(&T::zero());
+        self.x = s.read::<T>(&num::cast(0).unwrap());
+        self.y = s.read::<T>(&num::cast(0).unwrap());
+        self.z = s.read::<T>(&num::cast(0).unwrap());
     }
 }
 
@@ -321,8 +313,8 @@ impl<T> MathVector<T> for Vec2<T> where T: VectorElement {
         println!("{:?}", o);
         println!("In 2D we can not have a cross product");
         Vec2 {
-            x: T::zero(),
-            y: T::zero(),
+            x: num::cast(0).unwrap(),
+            y: num::cast(0).unwrap(),
         }
     }
 
@@ -353,7 +345,7 @@ impl<T> MathVector<T> for Vec2<T> where T: VectorElement {
     }
 
     fn read(&mut self, s: &mut Stream) {
-        self.x = s.read::<T>(&T::zero());
-        self.y = s.read::<T>(&T::zero());
+        self.x = s.read::<T>(&num::cast(0).unwrap());
+        self.y = s.read::<T>(&num::cast(0).unwrap());
     }
 }

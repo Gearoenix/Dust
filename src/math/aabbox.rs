@@ -1,3 +1,5 @@
+extern crate num;
+
 use ::math::num::{
     min,
     max,
@@ -52,8 +54,8 @@ impl<T> AABBox3<T> where T: VectorElement, Vec3<T>: MathVector<T> {
 
     pub fn new() -> AABBox3<T> {
         AABBox3 {
-            blf: Vec3::new(T::zero()),
-            trr: Vec3::new(T::zero()),
+            blf: Vec3::new(num::cast(0).unwrap()),
+            trr: Vec3::new(num::cast(0).unwrap()),
         }
     }
 

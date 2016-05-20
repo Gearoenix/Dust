@@ -52,19 +52,19 @@ macro_rules! tri {
 
                 let pvec = r.d.cross(&self.edg[1]);
                 let det = self.edg[0].dot(&pvec);
-                if det == T::zero() {
+                if det == num::cast(0).unwrap() {
                     return None;
                 }
                 let inv_det: T;
-                inv_det = T::one() / det;
+                inv_det = num::cast::<i8, T>(1).unwrap() / det;
                 let tvec = r.o - *(vertices[self.ind[0]].get_pos());
                 let u = tvec.dot(&pvec) * inv_det;
-                if u < T::zero() || u > T::one() {
+                if u < num::cast(0).unwrap() || u > num::cast(1).unwrap() {
                     return None;
                 }
                 let qvec = tvec.cross(&self.edg[0]);
                 let v = r.d.dot(&qvec) * inv_det;
-                if v < T::zero() || u + v > T::one() {
+                if v < num::cast(0).unwrap() || u + v > num::cast(1).unwrap() {
                     return None;
                 }
                 let t = self.edg[1].dot(&qvec) * inv_det; // Set distance along ray to intersection
@@ -87,7 +87,7 @@ macro_rules! tri {
                 let d = d00*d11 - d01*d01;
                 let v = (d11*d20 - d01*d21) / d;
                 let w = (d00*d21 - d01*d20) / d;
-                let u = T::one() - v - w;
+                let u = num::cast::<i8, T>(1).unwrap() - v - w;
                 return Vec3 {
                     x: u,
                     y: v,

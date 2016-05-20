@@ -55,8 +55,8 @@ impl<E, T> KDNode<E, T> where E: VectorElement, T: Triangle<E> {
         }
 
         node.area = tris[0].get_aabb(vertices);
-        let mut midpt = Vec3::new(E::zero());
-        let tris_recp = E::one() / num::cast(tris.len()).unwrap();
+        let mut midpt = Vec3::new(num::cast(0).unwrap());
+        let tris_recp = num::cast::<i8, E>(1).unwrap() / num::cast(tris.len()).unwrap();
 
         for tri in tris {
             node.area.expand(&tri.get_aabb(vertices));

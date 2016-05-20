@@ -46,7 +46,7 @@ impl Mesh for BasicMesh {
             self.vs[i] = PosNrm::read(s);
         }
         let triangles_count = (s.read(&0u32) / 3) as usize;
-        let indices = Vec::new();
+        let mut indices = Vec::new();
         indices.resize(triangles_count, [0usize; 3]);
         for i in 0..triangles_count {
             indices[i] = [
@@ -88,7 +88,7 @@ impl Mesh for TexturedMesh {
             self.vs[i].read(s);
         }
         let triangles_count = (s.read(&0u32) / 3) as usize;
-        let indices = Vec::new();
+        let mut indices = Vec::new();
         indices.resize(triangles_count, [0usize; 3]);
         for i in 0..triangles_count {
             indices[i] = [
