@@ -5,10 +5,11 @@ use std::ops::{
     Sub,
     Mul,
     Div,
+    Neg,
     AddAssign,
     SubAssign,
     MulAssign,
-    DivAssign
+    DivAssign,
 };
 use std::fmt::Debug;
 
@@ -27,6 +28,7 @@ pub trait VectorElement:
         Sub<Output=Self> +
         Mul<Output=Self> +
         Div<Output=Self> +
+        Neg<Output=Self> +
         AddAssign +
         SubAssign +
         MulAssign +
@@ -45,6 +47,7 @@ impl<T> VectorElement for T where
         Sub<Output=T> +
         Mul<Output=T> +
         Div<Output=T> +
+        Neg<Output=T> +
         AddAssign +
         SubAssign +
         MulAssign +
@@ -214,9 +217,9 @@ impl<T> MathVector<T> for Vec3<T> where T: VectorElement {
     }
 
     fn read(&mut self, s: &mut Stream) {
-        self.x = s.read::<T>(&num::cast(0).unwrap());
-        self.y = s.read::<T>(&num::cast(0).unwrap());
-        self.z = s.read::<T>(&num::cast(0).unwrap());
+        self.x = num::cast::<f32, T>(s.read(&0f32)).unwrap();
+        self.y = num::cast::<f32, T>(s.read(&0f32)).unwrap();
+        self.z = num::cast::<f32, T>(s.read(&0f32)).unwrap();
     }
 }
 

@@ -26,14 +26,67 @@ pub trait Mat {
 pub trait Mat4<E>: Mat + Mul<Vec3<E>> + Mul where E: VectorElement, Self: Sized {
 }
 
-pub struct Mat4x4<E> {
+#[derive(Debug, Clone, Copy)]
+pub struct Mat4x4<E> where E: VectorElement {
     pub data: [[E; 4]; 4],
 }
 
 impl<E> Mat4x4<E> where E: VectorElement {
     pub fn new() -> Mat4x4<E> {
         Mat4x4 {
-            data: [[num::cast(0).unwrap(); 4]; 4],
+            data: [
+                [num::cast(1).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap()],
+                [num::cast(0).unwrap(), num::cast(1).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap()],
+                [num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(1).unwrap(), num::cast(0).unwrap()],
+                [num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(1).unwrap()],
+            ],
+        }
+    }
+
+    pub fn rotation_transform(d: &E, v: &Vec3<E>) -> Mat4x4<E> {
+        let sinus: E = num::cast(num::cast::<E, f64>(*d).unwrap().sin()).unwrap();
+		let cosinus: E = num::cast(num::cast::<E, f64>(*d).unwrap().cos()).unwrap();
+		let oneminuscos = num::cast::<u8, E>(1).unwrap() - cosinus;
+		let w = v;
+		let wx2 = w.x * w.x;
+		let wxy = w.x * w.y;
+		let wxz = w.x * w.z;
+		let wy2 = w.y * w.y;
+		let wyz = w.y * w.z;
+		let wz2 = w.z * w.z;
+		let wxyonemincos = wxy * oneminuscos;
+		let wxzonemincos = wxz * oneminuscos;
+		let wyzonemincos = wyz * oneminuscos;
+		let wxsin = w.x * sinus;
+		let wysin = w.y * sinus;
+		let wzsin = w.z * sinus;
+		Mat4x4 {
+            data: [
+    		    [
+                    cosinus + (wx2 * oneminuscos),
+                    wxyonemincos - wzsin,
+                    wysin + wxzonemincos,
+                    num::cast(0).unwrap(),
+                ],
+    		    [
+                    wzsin + wxyonemincos,
+                    cosinus + (wy2 * oneminuscos),
+                    wyzonemincos - wxsin,
+                    num::cast(0).unwrap(),
+                ],
+    		    [
+                    wxzonemincos - wysin,
+                    wxsin + wyzonemincos,
+                    cosinus + (wz2 * oneminuscos),
+                    num::cast(0).unwrap(),
+                ],
+    		    [
+                    num::cast(0).unwrap(),
+                    num::cast(0).unwrap(),
+                    num::cast(0).unwrap(),
+                    num::cast(1).unwrap(),
+                ],
+            ],
         }
     }
 }
@@ -42,7 +95,7 @@ impl<E> Mat for Mat4x4<E> where E: VectorElement {
     fn read(&mut self, s: &mut Stream) {
         for i in 0..4 {
             for j in 0..4 {
-                self.data[j][i] = s.read(&num::cast(0).unwrap());
+                self.data[j][i] = num::cast(s.read(&0f32)).unwrap();
             }
         }
     }

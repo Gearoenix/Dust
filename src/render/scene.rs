@@ -9,12 +9,18 @@ use ::math::vector::{
     VectorElement,
 };
 use ::math::triangle::Triangle;
+use ::render::camera::{
+    Camera,
+    camera_reader,
+};
 use ::render::geometry::BasicGeometry;
 
 pub struct Scene {
     pub gs: Vec<BasicGeometry>,
     pub gm: HashMap<String, usize>,
     // pub gt: TODO KDTree for geometries in scene
+    pub cameras: Vec<Box<Camera<f64>>>,
+    active_camera_index: usize,
 }
 
 impl Scene {
@@ -22,6 +28,8 @@ impl Scene {
         Scene {
             gs: Vec::new(),
             gm: HashMap::new(),
+            cameras: Vec::new(),
+            active_camera_index: 0,
         }
     }
 
@@ -43,7 +51,8 @@ impl Scene {
                     self.gs.push(g);
                 }
                 4 => {
-                    panic!("Cameras are not supported yet.");
+                    self.active_camera_index = self.cameras.len();
+                    self.cameras.push(camera_reader(s));
                 }
                 5 => {
                     panic!("Sun are not supported yet.");
