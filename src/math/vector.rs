@@ -70,7 +70,8 @@ pub trait MathVector <ElementType>:
         Mul<ElementType, Output=Self> +
         MulAssign<ElementType> +
         Div<ElementType, Output=Self> +
-        DivAssign<ElementType>
+        DivAssign<ElementType> +
+        Neg<Output=Self>
     where ElementType: VectorElement {
     fn new(e: ElementType) -> Self;
     fn dot(&self, o: &Self) -> ElementType;
@@ -165,6 +166,17 @@ sopasg3!(add_assign, AddAssign, +=);
 sopasg3!(sub_assign, SubAssign, -=);
 sopasg3!(mul_assign, MulAssign, *=);
 sopasg3!(div_assign, DivAssign, /=);
+
+impl<E> Neg for Vec3<E> where E: VectorElement {
+    type Output = Vec3<E>;
+    fn neg(self) -> Vec3<E> {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+}
 
 impl<T> MathVector<T> for Vec3<T> where T: VectorElement {
 
@@ -298,6 +310,16 @@ sopasg2!(add_assign, AddAssign, +=);
 sopasg2!(sub_assign, SubAssign, -=);
 sopasg2!(mul_assign, MulAssign, *=);
 sopasg2!(div_assign, DivAssign, /=);
+
+impl<E> Neg for Vec2<E> where E: VectorElement {
+    type Output = Vec2<E>;
+    fn neg(self) -> Vec2<E> {
+        Vec2 {
+            x: -self.x,
+            y: -self.y,
+        }
+    }
+}
 
 impl<T> MathVector<T> for Vec2<T> where T: VectorElement {
 

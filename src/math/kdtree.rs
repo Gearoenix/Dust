@@ -93,7 +93,7 @@ impl<E, T> KDNode<E, T> where E: VectorElement, T: Triangle<E> {
         Some(Box::new(node))
     }
 
-    pub fn hit<V>(node: &KDNode<E, T>, ray: &Ray3<E>, tmin: &E, vertices: &Vec<V>) -> Option<(E, usize)> where V: HasPosition<E> {
+    pub fn hit<V>(node: &KDNode<E, T>, ray: &Ray3<E>, tmin: &E, vertices: &Vec<V>) -> Option<(E, *const T)> where V: HasPosition<E> {
         let (does_inter, dist) = node.area.intersection(ray);
         if does_inter {
             if dist.gt(tmin) {
@@ -135,7 +135,7 @@ impl<E, T> KDNode<E, T> where E: VectorElement, T: Triangle<E> {
                     }
                 }
                 if hit_tri {
-                    return Some((tmp_t, tri_ind));
+                    return Some((tmp_t, &(node.triangles[tri_ind]) as *const T));
                 }
             }
         }

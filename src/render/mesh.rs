@@ -1,9 +1,16 @@
 use ::io::file::Stream;
 use ::math::kdtree::KDNode;
+use ::math::ray::Ray3;
 use ::math::triangle::{
+    Triangle,
     SolidTriangle,
     TexturedTriangle,
 };
+use ::math::vector::{
+    Vec3,
+    VectorElement
+};
+use ::materials::material::Material;
 use ::materials::solid_materials::{
     SolidMaterial,
     BasicSolidMaterial,
@@ -19,6 +26,7 @@ use ::render::vertex::{
 
 pub trait Mesh {
     fn read(&mut self, s: &mut Stream);
+    fn hit<E, T>(&self, r: &Ray3<E>) -> Option<(E, Vec3<E>, Vec3<E>, Box<Material>, *const T)> where E: VectorElement, T: Triangle<E>;
 }
 
 
@@ -61,6 +69,11 @@ impl Mesh for BasicMesh {
             triangles[i] = SolidTriangle::new(&indices[i], &self.vs);
         }
         self.kdt = KDNode::build(&triangles, &0, &self.vs).unwrap();
+    }
+
+    // distance, position, normal, material
+    fn hit<E>(&self, r: &Ray3<E>) -> Option<(E, Vec3<E>, Vec3<E>, Box<Material>)> where E: VectorElement {
+
     }
 }
 

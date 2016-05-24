@@ -1,3 +1,4 @@
+use std;
 use std::collections::HashMap;
 
 use ::math::vector::{
@@ -87,6 +88,24 @@ impl BasicGeometry {
             }
             aabb
         }
+    }
+
+    // distance, position, normal, material
+    pub fn hit(&self, r: &Ray3<f64>) -> Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> {
+        let mut hit = false;
+        let mut distance = std::f64::MAX;
+        let mut result: Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> = None;
+        // TODO i must search through kdtree for mesh finding.
+        for m in self.ms {
+            let hited = m.hit(r);
+            if hited.is_some() {
+                let (d, _, _, _) = hited;
+                if d < distance {
+                    result = hited;
+                }
+            }
+        }
+        result
     }
 }
 

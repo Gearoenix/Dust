@@ -1,3 +1,5 @@
+extern crate num;
+
 use std::collections::HashMap;
 
 use ::io::file::Stream;
@@ -20,7 +22,7 @@ pub struct Scene {
     pub gm: HashMap<String, usize>,
     // pub gt: TODO KDTree for geometries in scene
     pub cameras: Vec<Box<Camera<f64>>>,
-    active_camera_index: usize,
+    pub active_camera_index: usize,
 }
 
 impl Scene {
@@ -68,7 +70,11 @@ impl Scene {
         }
     }
 
-    // fn trace_ray(r: &Ray3<E>, d: u32) {
-    //
-    // }
+    fn trace_ray<E>(&self, r: &Ray3<E>, d: u32) -> Vec3<E> where E: VectorElement {
+        // TODO search by kdtree for geometries
+        for g in self.gs {
+
+        }
+        Vec3::new(num::cast(1).unwrap())
+    }
 }
