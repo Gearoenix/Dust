@@ -9,7 +9,7 @@ use ::math::vector::{
 
 use ::io::file::Stream;
 
-pub trait Vertex {
+pub trait Vertex<E> {
 }
 
 pub trait HasPosition<T>: Vertex where T: VectorElement {
