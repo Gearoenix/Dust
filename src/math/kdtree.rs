@@ -1,5 +1,3 @@
-extern crate num;
-
 use std;
 
 use ::math::aabbox::{
@@ -12,24 +10,19 @@ use ::math::triangle::{
 use ::math::ray::Ray3;
 use ::math::vector::{
     Vec3,
-    MathVector,
-    VectorElement,
     Axis,
 };
-use ::render::vertex::{
-    HasPosition,
-};
+use ::render::vertex::Vertex;
 
-pub struct KDNode<E> where E: VectorElement {
-    pub area:    AABBox3<E>,
-    pub left:    Option<Box<KDNode<E>>>,
-    pub right:   Option<Box<KDNode<E>>>,
+pub struct KDNode {
+    pub area:    AABBox3,
+    pub left:    Option<Box<KDNode>>,
+    pub right:   Option<Box<KDNode>>,
     pub indices: Vec<usize>,
 }
 
-impl<E> KDNode<E> where E: VectorElement {
-
-    pub fn new() -> KDNode<E> {
+impl KDNode {
+    pub fn new() -> KDNode {
         KDNode {
             area:    AABBox3::new(),
             left:    None,
@@ -38,7 +31,7 @@ impl<E> KDNode<E> where E: VectorElement {
         }
     }
 
-    pub fn build<V, T>(indices: &Vec<usize>, vertices: &Vec<V>, triangles: &Vec<T>) -> Option<Box<KDNode<E>>> where V: HasPosition<E>, T: Triangle<E> {
+    pub fn build(indices: &Vec<usize>, vertices: &Vec<Vertex>, triangles: &Vec<Triangle>) -> Option<Box<KDNode>> {
         let mut node = KDNode::new();
         if indices.len() < 1 {
             return None;
@@ -50,8 +43,8 @@ impl<E> KDNode<E> where E: VectorElement {
         }
 
         node.area = triangles[indices[0]].get_aabb(vertices);
-        let mut midpt = Vec3::new(num::cast(0).unwrap());
-        let tris_recp = num::cast::<i8, E>(1).unwrap() / num::cast(indices.len()).unwrap();
+        let mut midpt = Vec3::new();
+        let tris_recp = 1f64 / (indices.len() as f64);
 
         for index in indices {
             node.area.expand(&triangles[*index].get_aabb(vertices));
@@ -83,12 +76,12 @@ impl<E> KDNode<E> where E: VectorElement {
         Some(Box::new(node))
     }
 
-    pub fn hit<V, T>(node: &KDNode<E>, ray: &Ray3<E>, tmin: &E, vertices: &Vec<V>, triangles: &Vec<T>) -> Option<(E, E, E, usize)> where V: HasPosition<E>, T: Triangle<E> {
+    pub fn hit(node: &KDNode, ray: &Ray3, tmin: f64, vertices: &Vec<Vertex>, triangles: &Vec<Triangle>) -> Option<(f64, f64, f64, usize)> {
         let (does_inter, dist) = node.area.intersection(ray);
         if !does_inter {
             return None;
         }
-        if dist.gt(tmin) {
+        if dist.gt(&tmin) {
             return None;
         }
         match node.left {
@@ -108,9 +101,9 @@ impl<E> KDNode<E> where E: VectorElement {
         }
         let mut hit_tri = false;
         let mut tri_ind: usize = 0;
-        let mut t = *tmin;
-        let mut u: E = num::cast(0).unwrap();
-        let mut v: E = num::cast(0).unwrap();
+        let mut t = tmin;
+        let mut u = 0f64;
+        let mut v = 0f64;
         for index in node.indices.iter() {
             match triangles[*index].intersect(ray, tmin, vertices) {
                 Some((_t, _u, _v)) => {

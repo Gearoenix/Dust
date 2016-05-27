@@ -5,7 +5,6 @@ use std::io::{
 };
 
 use ::io::file::Stream;
-use ::math::vector::VectorElement;
 use ::render::scene::Scene;
 
 pub struct ScenesManager {
@@ -30,7 +29,7 @@ impl ScenesManager {
         }
     }
 
-    pub fn get_scene<E>(&self, name: &String, s: &mut Stream) -> Scene<E> where E: VectorElement {
+    pub fn get_scene(&self, name: &String, s: &mut Stream) -> Scene {
         s.reader.seek(SeekFrom::Start(self.name_index[name]));
         let mut scene = Scene::new();
         scene.read(s);

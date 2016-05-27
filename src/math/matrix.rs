@@ -1,5 +1,3 @@
-extern crate num;
-
 use std::ops::{
     Add,
     Sub,
@@ -14,39 +12,30 @@ use std::ops::{
 use ::math::vector::{
     Vec2,
     Vec3,
-    MathVector,
-    VectorElement,
 };
 use ::io::file::Stream;
 
-pub trait Mat {
-    fn read(&mut self, s: &mut Stream);
-}
-
-pub trait Mat4<E>: Mat + Mul<Vec3<E>> + Mul where E: VectorElement, Self: Sized {
-}
-
 #[derive(Debug, Clone, Copy)]
-pub struct Mat4x4<E> where E: VectorElement {
-    pub data: [[E; 4]; 4],
+pub struct Mat4x4 {
+    pub data: [[f64; 4]; 4],
 }
 
-impl<E> Mat4x4<E> where E: VectorElement {
-    pub fn new() -> Mat4x4<E> {
+impl Mat4x4 {
+    pub fn new() -> Mat4x4 {
         Mat4x4 {
             data: [
-                [num::cast(1).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap()],
-                [num::cast(0).unwrap(), num::cast(1).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap()],
-                [num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(1).unwrap(), num::cast(0).unwrap()],
-                [num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(0).unwrap(), num::cast(1).unwrap()],
+                [1f64, 0f64, 0f64, 0f64],
+                [0f64, 1f64, 0f64, 0f64],
+                [0f64, 0f64, 1f64, 0f64],
+                [0f64, 0f64, 0f64, 1f64],
             ],
         }
     }
 
-    pub fn rotation_transform(d: &E, v: &Vec3<E>) -> Mat4x4<E> {
-        let sinus: E = num::cast(num::cast::<E, f64>(*d).unwrap().sin()).unwrap();
-		let cosinus: E = num::cast(num::cast::<E, f64>(*d).unwrap().cos()).unwrap();
-		let oneminuscos = num::cast::<u8, E>(1).unwrap() - cosinus;
+    pub fn rotation_transform(d: f64, v: &Vec3) -> Mat4x4 {
+        let sinus: f64 = d.sin();
+		let cosinus: f64 = d.cos();
+		let oneminuscos = 1f64 - cosinus;
 		let w = v;
 		let wx2 = w.x * w.x;
 		let wxy = w.x * w.y;
@@ -66,44 +55,42 @@ impl<E> Mat4x4<E> where E: VectorElement {
                     cosinus + (wx2 * oneminuscos),
                     wxyonemincos - wzsin,
                     wysin + wxzonemincos,
-                    num::cast(0).unwrap(),
+                    0.0,
                 ],
     		    [
                     wzsin + wxyonemincos,
                     cosinus + (wy2 * oneminuscos),
                     wyzonemincos - wxsin,
-                    num::cast(0).unwrap(),
+                    0.0,
                 ],
     		    [
                     wxzonemincos - wysin,
                     wxsin + wyzonemincos,
                     cosinus + (wz2 * oneminuscos),
-                    num::cast(0).unwrap(),
+                    0.0,
                 ],
     		    [
-                    num::cast(0).unwrap(),
-                    num::cast(0).unwrap(),
-                    num::cast(0).unwrap(),
-                    num::cast(1).unwrap(),
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
                 ],
             ],
         }
     }
-}
 
-impl<E> Mat for Mat4x4<E> where E: VectorElement {
-    fn read(&mut self, s: &mut Stream) {
+    pub fn read(&mut self, s: &mut Stream) {
         for i in 0..4 {
             for j in 0..4 {
-                self.data[j][i] = num::cast(s.read(&0f32)).unwrap();
+                self.data[j][i] = s.read(&0f32) as f64;
             }
         }
     }
 }
 
-impl<E> Mul<Vec3<E>> for Mat4x4<E> where E: VectorElement {
-    type Output = Vec3<E>;
-    fn mul(self, o: Vec3<E>) -> Vec3<E> {
+impl Mul<Vec3> for Mat4x4 {
+    type Output = Vec3;
+    fn mul(self, o: Vec3) -> Vec3 {
         Vec3 {
             x: self.data[0][0] * o.x + self.data[0][1] * o.y + self.data[0][2] * o.z + self.data[0][3],
             y: self.data[1][0] * o.x + self.data[1][1] * o.y + self.data[1][2] * o.z + self.data[1][3],
@@ -112,13 +99,13 @@ impl<E> Mul<Vec3<E>> for Mat4x4<E> where E: VectorElement {
     }
 }
 
-impl<E> Mul<Mat4x4<E>> for Mat4x4<E> where E: VectorElement {
-    type Output = Mat4x4<E>;
-    fn mul(self, o: Mat4x4<E>) -> Mat4x4<E> {
+impl Mul<Mat4x4> for Mat4x4 {
+    type Output = Mat4x4;
+    fn mul(self, o: Mat4x4) -> Mat4x4 {
         let mut m = Mat4x4::new();
         for i in 0..4 {
             for j in 0..4 {
-                m.data[i][j] = num::cast(0).unwrap();
+                m.data[i][j] = 0.0;
                 for k in 0..4 {
                     m.data[i][j] += self.data[i][k] * o.data[k][j];
                 }
@@ -127,5 +114,3 @@ impl<E> Mul<Mat4x4<E>> for Mat4x4<E> where E: VectorElement {
         m
     }
 }
-
-impl<E> Mat4<E> for Mat4x4<E> where E: VectorElement {}

@@ -1,11 +1,8 @@
 pub mod io;
-pub mod materials;
 pub mod math;
 pub mod render;
 pub mod texture;
 pub mod ui;
-
-use math::vector::MathVector;
 
 fn main() {
     let v1 = math::vector::Vec3 {
@@ -46,7 +43,7 @@ fn main() {
     let mut scenes_manager = render::scenes_manager::ScenesManager::new();
     textures_manager.read_table(&mut file);
     scenes_manager.read_table(&mut file);
-    let mut scene = scenes_manager.get_scene::<f64>(&"Scene".to_string(), &mut file);
+    let mut scene = scenes_manager.get_scene(&"Scene".to_string(), &mut file);
 
     let ui_manager = match ui::UiManager::new() {
         Some(u) => u,

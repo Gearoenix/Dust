@@ -1,5 +1,3 @@
-extern crate num;
-
 use std::collections::HashMap;
 
 use ::io::file::Stream;
@@ -7,8 +5,6 @@ use ::math::ray::Ray3;
 use ::math::vector::{
     Vec2,
     Vec3,
-    MathVector,
-    VectorElement,
 };
 use ::math::triangle::Triangle;
 use ::render::camera::{
@@ -17,16 +13,16 @@ use ::render::camera::{
 };
 use ::render::geometry::BasicGeometry;
 
-pub struct Scene<'a, E> where E: VectorElement + 'a {
-    pub gs: Vec<BasicGeometry<'a, E>>,
+pub struct Scene {
+    pub gs: Vec<BasicGeometry>,
     pub gm: HashMap<String, usize>,
     // pub gt: TODO KDTree for geometries in scene
-    pub cameras: Vec<Box<Camera<f64>>>,
+    pub cameras: Vec<Box<Camera>>,
     pub active_camera_index: usize,
 }
 
-impl<'a, E> Scene<'a, E> where E: VectorElement {
-    pub fn new() -> Scene<'a, E> {
+impl Scene {
+    pub fn new() -> Scene {
         Scene {
             gs: Vec::new(),
             gm: HashMap::new(),
@@ -71,12 +67,12 @@ impl<'a, E> Scene<'a, E> where E: VectorElement {
     }
 
     // color,
-    fn hit(&self, r: &Ray3<E>) -> Option<Vec3<E>> where E: VectorElement {
+    fn hit(&self, r: &Ray3) -> Option<Vec3> {
 
         // TODO search by kdtree for geometries
         for g in self.gs.iter() {
 
         }
-        Vec3::new(num::cast(1).unwrap())
+        None
     }
 }
