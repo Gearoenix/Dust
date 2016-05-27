@@ -5,9 +5,13 @@ use ::render::scene::Scene;
 
 pub struct Renderer {
     samples_count_sqrt: f64,
+    bounce_count: u64,
 }
 
-pub fn render_scene(samples_count_sqrt: &u32, scene: &scene, screen_width: &u32, screen_height: &u32) -> [Vec3<f64>] {
+
+const BOUNCE_COUNT: u64 = 2;
+
+pub fn render_scene(samples_count_sqrt: &u32, scene: &scene, screen_width: &u32, screen_height: &u32, bounce_count: u64) -> [Vec3<f64>] {
     let mut screen = [Vec3<f64>; screen_width * screen_height];
     screen[0] = Vec3::new();
     let camera = scene.cameras[scene.active_camera_index];
@@ -27,7 +31,7 @@ pub fn render_scene(samples_count_sqrt: &u32, scene: &scene, screen_width: &u32,
                     break;
                 }
                 let ray = camera.get_ray(x, y);
-                screen[screen_index] += scene.trace_ray(&r, 5u32);
+                screen[screen_index] += bouncer(scene, &r);
                 if pixel_sample_count > *samples_count_sqrt {
                     pixel_sample_count = 0;
                     screen_index++;
@@ -40,4 +44,8 @@ pub fn render_scene(samples_count_sqrt: &u32, scene: &scene, screen_width: &u32,
         }
     }
     screen
+}
+
+fn bouncer<E>(scene: &scene, ray: &Ray3<E>, bounce_count: u64) -> Vec3<E> where E: VectorElement {
+    scene.
 }

@@ -42,7 +42,7 @@ use ::io::file::Stream;
 // }
 
 pub struct BasicGeometry<'a, E> where E: VectorElement + 'a {
-    pub meshes: Vec<Box<MeshTrait<E> + 'a>>,
+    pub meshes: Vec<Box<MeshTrait<'a, E> + 'a>>,
     pub name_mesh_index: HashMap<String, usize>,
     pub position: Vec3<E>,
     pub transform: Mat4x4<E>,
@@ -100,22 +100,32 @@ impl<'a, E> BasicGeometry<'a, E> where E: VectorElement + 'a {
     }
 
     // distance, position, normal, material
-    // pub fn hit(&self, r: &Ray3<f64>) -> Option<(E, Vec3<E>, Vec3<E>, Box<Material<E>>)> {
-    //     let mut hit = false;
-    //     let mut distance = std::f64::MAX;
-    //     let mut result: Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> = None;
-    //     // TODO i must search through kdtree for mesh finding.
-    //     for m in self.ms {
-    //         let hited = m.hit(r);
-    //         if hited.is_some() {
-    //             let (d, _, _, _) = hited;
-    //             if d < distance {
-    //                 result = hited;
-    //             }
-    //         }
-    //     }
-    //     result
-    // }
+    pub fn hit(&self, r: &Ray3<E>, tmin: &E) -> Option<(E, E, E, usize)> {
+        // let mut hit = false;
+        let mut distance = *tmin;
+        let mut result: Option<(E, E, E, usize)> = None;
+        // TODO i must search through kdtree for mesh finding.
+        for (mesh_index, m) in self.meshes.iter().enumerate() {
+            let hited = m.hit(r, &distance);
+            if hited.is_some() {
+                let (d, u, v, _) = hited.unwrap();
+                if d < distance {
+                    result = Some((d, u, v, mesh_index));
+                    distance = d;
+                }
+            }
+        }
+        result
+    }
+
+    pub fn get_color(&self, r: &Ray3<E>, tmin: &E) -> Option<Vec3<E>> {
+        let h = self.hit(r, tmin);
+        if h.is_none() {
+            return None;
+        }
+        let (d, u, v, mesh_index) = h.unwrap();
+        return None;
+    }
 }
 
 // impl<E, T> Geometry<E, T> where E: VectorElement, T: Triangle<E> {

@@ -70,7 +70,9 @@ impl<'a, E> Scene<'a, E> where E: VectorElement {
         }
     }
 
-    fn trace_ray(&self, r: &Ray3<E>, d: u32) -> Vec3<E> where E: VectorElement {
+    // color,
+    fn hit(&self, r: &Ray3<E>) -> Option<Vec3<E>> where E: VectorElement {
+
         // TODO search by kdtree for geometries
         for g in self.gs.iter() {
 
