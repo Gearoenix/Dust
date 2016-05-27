@@ -1,3 +1,5 @@
+extern crate num;
+
 use ::io::file::Stream;
 use ::materials::material::Material;
 use ::materials::solid_materials::{
@@ -28,43 +30,90 @@ use ::render::vertex::{
 
 pub trait MeshTrait<E> where E: VectorElement {
     fn read(&mut self, s: &mut Stream);
-    fn hit(&self, r: &Ray3<E>) -> Option<(E, E, E, usize)>;
+    // fn hit(&self, r: &Ray3<E>) -> Option<(E, E, E, usize)>;
 }
 
-pub struct GenericMesh<E, V, M, T> where
-        E: VectorElement,
-        V: Vertex<E>,
-        M: Material<E>,
-        T: Triangle<E> {
-    vertices:  Vec<V>,
-    triangles: Vec<T>,
-    material:  M,
-    kdtree:    KDNode<E>,
+// pub struct GenericMesh<E, V, M, T> where
+//         E: VectorElement,
+//         V: Vertex<E>,
+//         M: Material<E>,
+//         T: Triangle<E> {
+//     vertices:  Vec<V>,
+//     triangles: Vec<T>,
+//     material:  M,
+//     kdtree:    KDNode<E>,
+// }
+//
+// impl<E, V, M, T> GenericMesh<E, V, M, T> where
+//         E: VectorElement,
+//         V: Vertex<E>,
+//         M: Material<E>,
+//         T: Triangle<E> {
+//     pub fn new() -> GenericMesh<E, V, M, T> {
+//         GenericMesh {
+//             vertices:  Vec::new(),
+//             triangles: Vec::new(),
+//             material:  M::new(),
+//             kdtree:    KDNode::new(),
+//         }
+//     }
+// }
+//
+// impl<E, V, M, T> MeshTrait<E> for GenericMesh<E, V, M, T> where
+//         E: VectorElement,
+//         V: Vertex<E>,
+//         M: Material<E>,
+//         T: Triangle<E> {
+//     fn read(&mut self, s: &mut Stream) {
+//         let vertex_count = (s.read(&0u32) as usize) / V::elements_count();
+//         self.vertices.resize(vertex_count, V::new());
+//         for i in 0..vertex_count {
+//             self.vertices[i].read(s);
+//         }
+//         let triangles_count = (s.read(&0u32) / 3) as usize;
+//         let mut indices = Vec::new();
+//         indices.resize(triangles_count, [0usize; 3]);
+//         for i in 0..triangles_count {
+//             indices[i] = [
+//                 s.read(&0u32) as usize,
+//                 s.read(&0u32) as usize,
+//                 s.read(&0u32) as usize,
+//             ];
+//         }
+//         self.triangles = Vec::new();
+//         self.triangles.resize(triangles_count, T::new(&indices[0], &self.vertices));
+//         let mut triangle_indices = Vec::new();
+//         triangle_indices.resize(triangles_count, 0usize);
+//         for i in 1..triangles_count {
+//             self.triangles[i] = T::new(&indices[i], &self.vertices);
+//             triangle_indices[i] = i;
+//         }
+//         self.kdtree = KDNode::build(&triangle_indices, &self.triangles, &self.vertices).unwrap();
+//     }
+// }
+
+pub struct SolidMesh<'a, E> where E: VectorElement + 'a {
+    vertices:  Vec<PosNrm<E>>,
+    triangles: Vec<SolidTriangle<E>>,
+    material:  Box<SolidMaterial<E> + 'a>,
+    kdtree:    Box<KDNode<E>>,
 }
 
-impl<E, V, M, T> GenericMesh<E, V, M, T> where
-        E: VectorElement,
-        V: Vertex<E>,
-        M: Material<E>,
-        T: Triangle<E> {
-    pub fn new() -> GenericMesh<E, V, M, T> {
-        GenericMesh {
+impl<'a, E> SolidMesh<'a, E> where E: VectorElement + 'a {
+    pub fn new() -> SolidMesh<'a, E> {
+        SolidMesh {
             vertices:  Vec::new(),
             triangles: Vec::new(),
-            material:  Box::new(),
-            kdtree:    Box::new(),
+            material:  Box::new(BasicSolidMaterial::new()),
+            kdtree:    Box::new(KDNode::new()),
         }
     }
 }
 
-impl<E, V, M, T> MeshTrait<E> for GenericMesh<E, V, M, T> where
-        E: VectorElement,
-        V: Vertex<E>,
-        M: Material<E>,
-        T: Triangle<E> {
+impl<'a, E> MeshTrait<E> for SolidMesh<'a, E> where E: VectorElement + 'a {
     fn read(&mut self, s: &mut Stream) {
-        let vertex_count = (s.read(&0u32) as usize) / V::elements_count();
-        self.vertices.resize(vertex_count, V::new());
+        let vertex_count: usize = (s.read(&0u32) as usize) / 6;
+        self.vertices.resize(vertex_count, PosNrm::new());
         for i in 0..vertex_count {
             self.vertices[i].read(s);
         }
@@ -79,16 +128,64 @@ impl<E, V, M, T> MeshTrait<E> for GenericMesh<E, V, M, T> where
             ];
         }
         self.triangles = Vec::new();
-        self.triangles.resize(triangles_count, T::new(&indices[0], &self.vertices));
+        self.triangles.resize(triangles_count, SolidTriangle::new(&indices[0], &self.vertices));
         let mut triangle_indices = Vec::new();
         triangle_indices.resize(triangles_count, 0usize);
         for i in 1..triangles_count {
-            self.triangles[i] = T::new(&indices[i], &self.vertices);
+            self.triangles[i] = SolidTriangle::new(&indices[i], &self.vertices);
             triangle_indices[i] = i;
         }
-        self.kdtree = KDNode::build(&triangle_indices, &self.triangles, &self.vertices).unwrap();
+        self.kdtree = KDNode::build(&triangle_indices, &self.vertices, &self.triangles).unwrap();
     }
 }
+
+pub struct TexturedMesh<'a, E> where E: VectorElement + 'a {
+    vertices:  Vec<PosNrmUV<E>>,
+    triangles: Vec<TexturedTriangle<E>>,
+    material:  Box<TexturedMaterial<E> + 'a>,
+    kdtree:    Box<KDNode<E>>,
+}
+
+impl<'a, E> TexturedMesh<'a, E> where E: VectorElement + 'a {
+    pub fn new() -> TexturedMesh<'a, E> {
+        TexturedMesh {
+            vertices:  Vec::new(),
+            triangles: Vec::new(),
+            material:  Box::new(BasicTexturedMaterial::new()),
+            kdtree:    Box::new(KDNode::new()),
+        }
+    }
+}
+
+impl<'a, E> MeshTrait<E> for TexturedMesh<'a, E> where E: VectorElement + 'a {
+    fn read(&mut self, s: &mut Stream) {
+        let vertex_count = (s.read(&0u32) as usize) / 8;
+        self.vertices.resize(vertex_count, PosNrmUV::new());
+        for i in 0..vertex_count {
+            self.vertices[i].read(s);
+        }
+        let triangles_count = (s.read(&0u32) / 3) as usize;
+        let mut indices = Vec::new();
+        indices.resize(triangles_count, [0usize; 3]);
+        for i in 0..triangles_count {
+            indices[i] = [
+                s.read(&0u32) as usize,
+                s.read(&0u32) as usize,
+                s.read(&0u32) as usize,
+            ];
+        }
+        self.triangles = Vec::new();
+        self.triangles.resize(triangles_count, TexturedTriangle::new(&indices[0], &self.vertices));
+        let mut triangle_indices = Vec::new();
+        triangle_indices.resize(triangles_count, 0usize);
+        for i in 1..triangles_count {
+            self.triangles[i] = TexturedTriangle::new(&indices[i], &self.vertices);
+            triangle_indices[i] = i;
+        }
+        self.kdtree = KDNode::build(&triangle_indices, &self.vertices, &self.triangles).unwrap();
+    }
+}
+
 
 //
 // pub struct BasicMesh {

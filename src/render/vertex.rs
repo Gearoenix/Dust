@@ -9,19 +9,22 @@ use ::math::vector::{
 
 use ::io::file::Stream;
 
-pub trait Vertex<E> {
+pub trait Vertex<E>: Sized + Clone + Copy where E: VectorElement {
+    fn elements_count() -> usize;
+    fn new() -> Self;
+    fn read(&mut self, s: &mut Stream);
 }
 
-pub trait HasPosition<T>: Vertex where T: VectorElement {
-    fn get_pos(&self) -> &Vec3<T>;
+pub trait HasPosition<E>: Vertex<E> where E: VectorElement {
+    fn get_pos(&self) -> &Vec3<E>;
 }
 
-pub trait HasNormal<T>: Vertex where T: VectorElement {
-    fn get_nrm(&self) -> &Vec3<T>;
+pub trait HasNormal<E>: Vertex<E> where E: VectorElement {
+    fn get_nrm(&self) -> &Vec3<E>;
 }
 
-pub trait HasUV<T>: Vertex where T: VectorElement {
-    fn get_uv(&self) -> &Vec2<T>;
+pub trait HasUV<E>: Vertex<E> where E: VectorElement {
+    fn get_uv(&self) -> &Vec2<E>;
 }
 
 macro_rules! at3 {
@@ -51,23 +54,30 @@ pub struct PosNrmUV<T> where T: VectorElement {
     pub uv:  Vec2<T>,
 }
 
-impl<T> PosNrmUV<T> where T: VectorElement {
-    pub fn new(e: T) -> PosNrmUV<T> {
+macro_rules! nc {
+    ($e:expr) => {
+        num::cast($e).unwrap()
+    }
+}
+
+impl<E> Vertex<E> for PosNrmUV<E> where E: VectorElement {
+    fn new() -> PosNrmUV<E> {
         PosNrmUV {
-            pos: Vec3::new(e),
-            nrm: Vec3::new(e),
-            uv:  Vec2::new(e),
+            pos: Vec3::new(nc!(0)),
+            nrm: Vec3::new(nc!(0)),
+            uv:  Vec2::new(nc!(0)),
         }
     }
 
-    pub fn read(&mut self, s: &mut Stream) {
+    fn read(&mut self, s: &mut Stream) {
         self.pos.read(s);
         self.nrm.read(s);
         self.uv.read(s);
     }
-}
 
-impl<E> Vertex for PosNrmUV<E> where E: VectorElement {
+    fn elements_count() -> usize {
+        8
+    }
 }
 
 at3!(get_pos, HasPosition, pos, PosNrmUV);
@@ -80,27 +90,28 @@ pub struct PosNrm<T> where T: VectorElement {
     pub nrm: Vec3<T>,
 }
 
-impl<T> PosNrm<T> where T: VectorElement {
-    pub fn new(e: T) -> PosNrm<T> {
-        PosNrm {
-            pos: Vec3::new(e),
-            nrm: Vec3::new(e),
-        }
-    }
-
-    pub fn read(s: &mut Stream) -> PosNrm<T> {
-        let mut pos = Vec3::new(num::cast::<i8, T>(0).unwrap());
-        pos.read(s);
-        let mut nrm = Vec3::new(num::cast::<i8, T>(0).unwrap());
-        nrm.read(s);
-        PosNrm {
-            pos: pos,
-            nrm: nrm,
-        }
+impl<E> PosNrm<E> where E: VectorElement {
+    fn elements_count() -> usize {
+        6
     }
 }
 
-impl<E> Vertex for PosNrm<E> where E: VectorElement {
+impl<E> Vertex<E> for PosNrm<E> where E: VectorElement {
+    fn new() -> PosNrm<E> {
+        PosNrm {
+            pos: Vec3::new(nc!(0)),
+            nrm: Vec3::new(nc!(0)),
+        }
+    }
+
+    fn read(&mut self, s: &mut Stream) {
+        self.pos.read(s);
+        self.nrm.read(s);
+    }
+
+    fn elements_count() -> usize {
+        6
+    }
 }
 
 at3!(get_pos, HasPosition, pos, PosNrm);

@@ -1,3 +1,5 @@
+extern crate num;
+
 use std;
 use std::collections::HashMap;
 
@@ -16,53 +18,60 @@ use ::math::matrix::{
     Mat4x4,
 };
 use ::math::ray::Ray3;
-use ::math::triangle::Triangle;
+use ::math::triangle::{
+    Triangle,
+    TexturedTriangle,
+};
 use ::math::kdtree::KDNode;
 use ::render::mesh::{
-    Mesh,
+    MeshTrait,
+    SolidMesh,
     TexturedMesh,
-    BasicMesh,
+};
+use ::render::vertex::{
+    PosNrmUV,
+    PosNrm,
 };
 use ::materials::material::Material;
+use ::materials::textured_materials::BasicTexturedMaterial;
+use ::materials::solid_materials::BasicSolidMaterial;
 use ::io::file::Stream;
 
 // pub trait Geometry {
 //     fn read<E>(&mut self, s: &mut Stream) -> AABBox3<E> where E: VectorElement;
 // }
 
-pub struct BasicGeometry {
-    pub ms: Vec<Box<Mesh>>,
-    pub mm: HashMap<String, usize>,
-    pub position: Vec3<f32>,
-    pub transform: Mat4x4<f32>,
+pub struct BasicGeometry<'a, E> where E: VectorElement + 'a {
+    pub meshes: Vec<Box<MeshTrait<E> + 'a>>,
+    pub name_mesh_index: HashMap<String, usize>,
+    pub position: Vec3<E>,
+    pub transform: Mat4x4<E>,
     // TODO add kdtree for your meshes
 }
 
-impl BasicGeometry {
-    pub fn new() -> BasicGeometry {
+impl<'a, E> BasicGeometry<'a, E> where E: VectorElement + 'a {
+    pub fn new() -> BasicGeometry<'a, E> {
         BasicGeometry {
-            ms: Vec::new(),
-            mm: HashMap::new(),
-            position: Vec3::new(0f32),
+            meshes: Vec::new(),
+            name_mesh_index: HashMap::new(),
+            position: Vec3::new(num::cast(0).unwrap()),
             transform: Mat4x4::new(),
         }
     }
 
-    pub fn read(&mut self, s: &mut Stream) -> AABBox3<f32> {
+    pub fn read(&mut self, s: &mut Stream) -> AABBox3<E> {
         let meshes_count = s.read(&0u8);
         for _ in 0..meshes_count {
-            let mesh_index = self.ms.len();
+            let mesh_index = self.meshes.len();
             let mesh_name = s.read_string();
-            let mut mesh: Box<Mesh>;
             if s.read_bool() {
                 let texture_index = s.read(&0u16);
-                mesh = Box::new(TexturedMesh::new());
+                self.meshes.push(Box::new(SolidMesh::new()));
             } else {
-                mesh = Box::new(BasicMesh::new());
+                self.meshes.push(Box::new(TexturedMesh::new()));
             }
-            mesh.read(s);
-            self.ms.push(mesh);
-            self.mm.insert(mesh_name, mesh_index);
+            self.meshes[mesh_index].read(s);
+            self.name_mesh_index.insert(mesh_name, mesh_index);
         }
         self.transform.read(s);
         self.position.read(s);
@@ -71,7 +80,7 @@ impl BasicGeometry {
             let vertex_count = (s.read(&0u32) / 3u32) as usize;
             let mut vs = Vec::new();
             let mut aabb = AABBox3::new();
-            vs.resize(vertex_count, Vec3::new(0f32));
+            vs.resize(vertex_count, Vec3::new(num::cast(0).unwrap()));
             for i in 0..vertex_count {
                 vs[i].read(s);
                 aabb.expand(&vs[i]);
@@ -91,22 +100,22 @@ impl BasicGeometry {
     }
 
     // distance, position, normal, material
-    pub fn hit(&self, r: &Ray3<f64>) -> Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> {
-        let mut hit = false;
-        let mut distance = std::f64::MAX;
-        let mut result: Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> = None;
-        // TODO i must search through kdtree for mesh finding.
-        for m in self.ms {
-            let hited = m.hit(r);
-            if hited.is_some() {
-                let (d, _, _, _) = hited;
-                if d < distance {
-                    result = hited;
-                }
-            }
-        }
-        result
-    }
+    // pub fn hit(&self, r: &Ray3<f64>) -> Option<(E, Vec3<E>, Vec3<E>, Box<Material<E>>)> {
+    //     let mut hit = false;
+    //     let mut distance = std::f64::MAX;
+    //     let mut result: Option<(f64, Vec3<f64>, Vec3<f64>, Box<Material>)> = None;
+    //     // TODO i must search through kdtree for mesh finding.
+    //     for m in self.ms {
+    //         let hited = m.hit(r);
+    //         if hited.is_some() {
+    //             let (d, _, _, _) = hited;
+    //             if d < distance {
+    //                 result = hited;
+    //             }
+    //         }
+    //     }
+    //     result
+    // }
 }
 
 // impl<E, T> Geometry<E, T> where E: VectorElement, T: Triangle<E> {

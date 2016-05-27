@@ -17,16 +17,16 @@ use ::render::camera::{
 };
 use ::render::geometry::BasicGeometry;
 
-pub struct Scene {
-    pub gs: Vec<BasicGeometry>,
+pub struct Scene<'a, E> where E: VectorElement + 'a {
+    pub gs: Vec<BasicGeometry<'a, E>>,
     pub gm: HashMap<String, usize>,
     // pub gt: TODO KDTree for geometries in scene
     pub cameras: Vec<Box<Camera<f64>>>,
     pub active_camera_index: usize,
 }
 
-impl Scene {
-    pub fn new() -> Scene {
+impl<'a, E> Scene<'a, E> where E: VectorElement {
+    pub fn new() -> Scene<'a, E> {
         Scene {
             gs: Vec::new(),
             gm: HashMap::new(),
@@ -70,9 +70,9 @@ impl Scene {
         }
     }
 
-    fn trace_ray<E>(&self, r: &Ray3<E>, d: u32) -> Vec3<E> where E: VectorElement {
+    fn trace_ray(&self, r: &Ray3<E>, d: u32) -> Vec3<E> where E: VectorElement {
         // TODO search by kdtree for geometries
-        for g in self.gs {
+        for g in self.gs.iter() {
 
         }
         Vec3::new(num::cast(1).unwrap())

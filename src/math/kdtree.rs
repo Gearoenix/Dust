@@ -54,8 +54,8 @@ impl<E> KDNode<E> where E: VectorElement {
         let tris_recp = num::cast::<i8, E>(1).unwrap() / num::cast(indices.len()).unwrap();
 
         for index in indices {
-            node.area.expand(&triangles[index].get_aabb(vertices));
-            midpt += triangles[index].get_midpoint(vertices) * tris_recp;
+            node.area.expand(&triangles[*index].get_aabb(vertices));
+            midpt += triangles[*index].get_midpoint(vertices) * tris_recp;
         }
 
         let mut left_indices = Vec::new();
@@ -65,9 +65,9 @@ impl<E> KDNode<E> where E: VectorElement {
         // TODO for performance imporvement: put match block out of the for loop.
         for index in indices {
             match axis {
-                Axis::X => if midpt.x >= triangles[index].get_midpoint(vertices).x { right_indices.push(index); } else { left_indices.push(index); },
-                Axis::Y => if midpt.y >= triangles[index].get_midpoint(vertices).y { right_indices.push(index); } else { left_indices.push(index); },
-                Axis::Z => if midpt.z >= triangles[index].get_midpoint(vertices).z { right_indices.push(index); } else { left_indices.push(index); },
+                Axis::X => if midpt.x >= triangles[*index].get_midpoint(vertices).x { right_indices.push(*index); } else { left_indices.push(*index); },
+                Axis::Y => if midpt.y >= triangles[*index].get_midpoint(vertices).y { right_indices.push(*index); } else { left_indices.push(*index); },
+                Axis::Z => if midpt.z >= triangles[*index].get_midpoint(vertices).z { right_indices.push(*index); } else { left_indices.push(*index); },
                 _ => panic!("Unexpected Axis value.")
             }
         }
@@ -93,7 +93,7 @@ impl<E> KDNode<E> where E: VectorElement {
         }
         match node.left {
             Some(ref left_node_p) => {
-                let l = KDNode::hit(&*left_node_p, ray, tmin, vertices);
+                let l = KDNode::hit(&*left_node_p, ray, tmin, vertices, triangles);
                 if l.is_some() {
                     return l;
                 }
@@ -102,21 +102,21 @@ impl<E> KDNode<E> where E: VectorElement {
         }
         match node.right {
             Some(ref right_node_p) => {
-                return KDNode::hit(&*right_node_p, ray, tmin, vertices);
+                return KDNode::hit(&*right_node_p, ray, tmin, vertices, triangles);
             }
             None => {}
         }
         let mut hit_tri = false;
         let mut tri_ind: usize = 0;
         let mut t = *tmin;
-        let mut u: E;
-        let mut v: E;
-        for index in node.indices {
-            match triangles[index].intersect(ray, tmin, vertices) {
+        let mut u: E = num::cast(0).unwrap();
+        let mut v: E = num::cast(0).unwrap();
+        for index in node.indices.iter() {
+            match triangles[*index].intersect(ray, tmin, vertices) {
                 Some((_t, _u, _v)) => {
                     if t.lt(&_t) {
                         hit_tri = true;
-                        tri_ind = index;
+                        tri_ind = *index;
                         t = _t;
                         u = _u;
                         v = _v;
