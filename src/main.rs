@@ -1,136 +1,52 @@
-// pub mod io;
-// pub mod math;
-// pub mod render;
-// pub mod texture;
-// pub mod ui;
-
-// fn main() {
-//     let v1 = math::vector::Vec3 {
-//         x: 2.0f64,
-//         y: 3.0f64,
-//         z: 4.0f64,
-//     };
-//     let v2 = math::vector::Vec3 {
-//         x: -3.0f64,
-//         y: -1.0f64,
-//         z:  1.0f64
-//     };
-//     let mut v3 = math::vector::Vec3 {
-//         x: 0.0,
-//         y: 0.0,
-//         z: 0.0,
-//     };
-//     let sc1 = 45.0f64;
-//     let ry1 = math::ray::Ray3 {
-//         o:    v1.clone(),
-//         d:    v2.clone(),
-//         invd: v3.clone()
-//     };
-//     // println!("{:?}", ((v1 + v2) * 3.9).dot(v2));
-//     v3 += v1 + v2;
-
-//     println!("{:?}", v3 * sc1);
-//     println!("{:?}", v3);
-//     println!("{:?}", sc1);
-//     println!("{:?}", v3.dot(&v1));
-//     println!("{:?}", v1);
-//     println!("{:?}", v3);
-//     println!("{:?}", ry1);
-
-//     let mut file = io::file::Stream::new(&("/home/thany/Temporary/1.gx3d".to_string()));
-
-//     let mut textures_manager = texture::textures_manager::TexturesManager::new();
-//     let mut scenes_manager = render::scenes_manager::ScenesManager::new();
-//     textures_manager.read_table(&mut file);
-//     scenes_manager.read_table(&mut file);
-//     let mut scene = scenes_manager.get_scene(&"Scene".to_string(), &mut file);
-
-//     let ui_manager = match ui::UiManager::new() {
-//         Some(u) => u,
-//         None    => return,
-//     };
-//     ui_manager.run();
-// }
-//! This example behaves the same as the `all_winit_glium` example while demonstrating how to run
-//! the `conrod` loop on a separate thread.
-
 #[macro_use]
 extern crate conrod;
-extern crate glium;
+extern crate rand;
 extern crate winit;
-mod support {
-    //! This module is used for sharing a few items between the `all_widgets.rs`, `glutin_glium.rs`
-    //! and glutin_gfx.rs` examples.
-    //!
-    //! The module contains:
-    //!
-    //! - `pub struct DemoApp` as a demonstration of some state we want to change.
-    //! - `pub fn gui` as a demonstration of all widgets, some of which mutate our `DemoApp`.
-    //! - `pub struct Ids` - a set of all `widget::Id`s used in the `gui` fn.
-    //!
-    //! By sharing these items between these examples, we can test and ensure that the different
-    //! events and drawing backends behave in the same manner.
+use conrod::backend::glium::glium;
 
-    extern crate rand;
-
-    use std;
-
-    use conrod::backend::glium::glium;
-
-
-    /// In most of the examples the `glutin` crate is used for providing the window context and
-    /// events while the `glium` crate is used for displaying `conrod::render::Primitives` to the
-    /// screen.
-    ///
-    /// This `Iterator`-like type simplifies some of the boilerplate involved in setting up a
-    /// glutin+glium event loop that works efficiently with conrod.
-
-    pub struct EventLoop {
-        ui_needs_update: bool,
-        last_update: std::time::Instant,
-    }
-
-    impl EventLoop {
-        pub fn new() -> Self {
-            EventLoop {
-                last_update: std::time::Instant::now(),
-                ui_needs_update: true,
-            }
-        }
-
-        /// Produce an iterator yielding all available events.
-        pub fn next(
-            &mut self,
-            events_loop: &mut glium::glutin::EventsLoop,
-        ) -> Vec<glium::glutin::Event> {
-            // We don't want to loop any faster than 60 FPS, so wait until it has been at least 16ms
-            // since the last yield.
-            let last_update = self.last_update;
-            let sixteen_ms = std::time::Duration::from_millis(16);
-            let duration_since_last_update = std::time::Instant::now().duration_since(last_update);
-            if duration_since_last_update < sixteen_ms {
-                std::thread::sleep(sixteen_ms - duration_since_last_update);
-            }
-
-            // Collect all pending events.
-            let mut events = Vec::new();
-            events_loop.poll_events(|event| events.push(event));
-
-            // If there are no events and the `Ui` does not need updating, wait for the next event.
-            if events.is_empty() && !self.ui_needs_update {
-                events_loop.run_forever(|event| {
-                    events.push(event);
-                    glium::glutin::ControlFlow::Break
-                });
-            }
-
-            self.ui_needs_update = false;
-            self.last_update = std::time::Instant::now();
-
-            events
+pub struct EventLoop {
+    ui_needs_update: bool,
+    last_update: std::time::Instant,
+}
+impl EventLoop {
+    pub fn new() -> Self {
+        EventLoop {
+            last_update: std::time::Instant::now(),
+            ui_needs_update: true,
         }
     }
 
+    /// Produce an iterator yielding all available events.
+    pub fn next(
+        &mut self,
+        events_loop: &mut glium::glutin::EventsLoop,
+    ) -> Vec<glium::glutin::Event> {
+        // We don't want to loop any faster than 60 FPS, so wait until it has been at least 16ms
+        // since the last yield.
+        let last_update = self.last_update;
+        let sixteen_ms = std::time::Duration::from_millis(16);
+        let duration_since_last_update = std::time::Instant::now().duration_since(last_update);
+        if duration_since_last_update < sixteen_ms {
+            std::thread::sleep(sixteen_ms - duration_since_last_update);
+        }
+
+        // Collect all pending events.
+        let mut events = Vec::new();
+        events_loop.poll_events(|event| events.push(event));
+
+        // If there are no events and the `Ui` does not need updating, wait for the next event.
+        if events.is_empty() && !self.ui_needs_update {
+            events_loop.run_forever(|event| {
+                events.push(event);
+                glium::glutin::ControlFlow::Break
+            });
+        }
+
+        self.ui_needs_update = false;
+        self.last_update = std::time::Instant::now();
+
+        events
+    }
 }
 
 extern crate find_folder;
@@ -171,7 +87,7 @@ pub fn main() {
     let rust_logo = image_map.insert(rust_logo);
 
     // Poll events from the window.
-    let mut event_loop = support::EventLoop::new();
+    let mut event_loop = EventLoop::new();
     'main: loop {
         // Handle all events.
         for event in event_loop.next(&mut events_loop) {
