@@ -2,12 +2,14 @@
 extern crate conrod;
 extern crate find_folder;
 extern crate image;
+extern crate num_cpus;
 extern crate rand;
 extern crate winit;
 
 pub mod render;
 
 use render::engine::CpuEngine;
+use render::engine::Data as EngineData;
 
 use conrod::backend::glium::glium;
 use conrod::backend::glium::glium::Surface;
@@ -59,8 +61,8 @@ impl EventLoop {
 }
 
 pub fn main() {
-    const WIDTH: u32 = 800;
-    const HEIGHT: u32 = 600;
+    const WIDTH: u32 = 1000;
+    const HEIGHT: u32 = 800;
 
     // Build the window.
     let mut events_loop = glium::glutin::EventsLoop::new();
@@ -85,9 +87,13 @@ pub fn main() {
 
     // Create our `conrod::image::Map` which describes each of our widget->image mappings.
     // In our case we only have one image, however the macro may be used to list multiple.
-    let mut engine = CpuEngine::new();
+    let data = EngineData {
+        view_port_dimension: (WIDTH - 100, HEIGHT - 100),
+    };
+    let engine = CpuEngine::new(data);
     let rust_logo = load_rust_logo(&display, &engine);
     let (w, h) = (rust_logo.get_width(), rust_logo.get_height().unwrap());
+    println!("{:?} {:?}", w, h);
     let mut image_map = conrod::image::Map::new();
     let rust_logo = image_map.insert(rust_logo);
 
@@ -145,7 +151,7 @@ pub fn main() {
 }
 
 fn load_rust_logo(display: &glium::Display, engine: &CpuEngine) -> glium::texture::Texture2d {
-    let image_dimensions = (128, 128);
+    let image_dimensions = engine.data.read().unwrap().view_port_dimension;
     let image_data = engine.render();
     let raw_image =
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image_data, image_dimensions);
