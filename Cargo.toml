@@ -4,7 +4,9 @@ version = "0.0.1"
 authors = ["Hossein Noroozpour Thany Abady"]
 
 [dependencies]
-cairo-rs = "*"
-gtk = "*"
+conrod = { version = "*", features = ["winit", "glium"] }
+find_folder = "*"
+winit = "*"
+glium = "*"
 image = "*"
-gdk-pixbuf = "*"
+rand = "*"
