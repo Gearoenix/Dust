@@ -1,8 +1,17 @@
 #[macro_use]
 extern crate conrod;
+extern crate find_folder;
+extern crate image;
 extern crate rand;
 extern crate winit;
+
+pub mod render;
+
+use render::engine::CpuEngine;
+
 use conrod::backend::glium::glium;
+use conrod::backend::glium::glium::Surface;
+use conrod::{color, widget, Colorable, Positionable, Sizeable, Widget};
 
 pub struct EventLoop {
     ui_needs_update: bool,
@@ -49,11 +58,6 @@ impl EventLoop {
     }
 }
 
-extern crate find_folder;
-extern crate image;
-use conrod::{color, widget, Colorable, Positionable, Sizeable, Widget};
-use conrod::backend::glium::glium::Surface;
-
 pub fn main() {
     const WIDTH: u32 = 800;
     const HEIGHT: u32 = 600;
@@ -81,7 +85,8 @@ pub fn main() {
 
     // Create our `conrod::image::Map` which describes each of our widget->image mappings.
     // In our case we only have one image, however the macro may be used to list multiple.
-    let rust_logo = load_rust_logo(&display);
+    let mut engine = CpuEngine::new();
+    let rust_logo = load_rust_logo(&display, &engine);
     let (w, h) = (rust_logo.get_width(), rust_logo.get_height().unwrap());
     let mut image_map = conrod::image::Map::new();
     let rust_logo = image_map.insert(rust_logo);
@@ -139,20 +144,9 @@ pub fn main() {
     }
 }
 
-fn load_rust_logo(display: &glium::Display) -> glium::texture::Texture2d {
+fn load_rust_logo(display: &glium::Display, engine: &CpuEngine) -> glium::texture::Texture2d {
     let image_dimensions = (128, 128);
-    let mut image_data = [255u8; 128 * 128 * 4];
-    for i in 0..128 {
-        for j in 0..128 {
-            if i > j {
-                image_data[(i * 128 + j) * 4 + 2] = 0;
-                image_data[(i * 128 + j) * 4 + 1] = 0;
-            } else {
-                image_data[(i * 128 + j) * 4] = 0;
-                image_data[(i * 128 + j) * 4 + 1] = 0;
-            }
-        }
-    }
+    let image_data = engine.render();
     let raw_image =
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image_data, image_dimensions);
     let texture = glium::texture::Texture2d::new(display, raw_image).unwrap();
