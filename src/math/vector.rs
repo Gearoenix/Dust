@@ -1,16 +1,6 @@
-use std::ops::{
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Neg,
-    AddAssign,
-    SubAssign,
-    MulAssign,
-    DivAssign,
-};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use ::io::file::Stream;
+// use ::io::file::Stream;
 
 pub enum Axis {
     X,
@@ -130,7 +120,7 @@ impl Vec3 {
         Vec3 {
             x: self.y * o.z - self.z * o.y,
             y: self.z * o.x - self.x * o.z,
-            z: self.x * o.y - self.y * o.x
+            z: self.x * o.y - self.y * o.x,
         }
     }
 
@@ -162,11 +152,11 @@ impl Vec3 {
         }
     }
 
-    pub fn read(&mut self, s: &mut Stream) {
-        self.x = s.read(&0f32) as f64;
-        self.y = s.read(&0f32) as f64;
-        self.z = s.read(&0f32) as f64;
-    }
+    // pub fn read(&mut self, s: &mut Stream) {
+    //     self.x = s.read(&0f32) as f64;
+    //     self.y = s.read(&0f32) as f64;
+    //     self.z = s.read(&0f32) as f64;
+    // }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -257,10 +247,7 @@ impl Neg for Vec2 {
 
 impl Vec2 {
     pub fn new() -> Vec2 {
-        Vec2 {
-            x: 0f64,
-            y: 0f64,
-        }
+        Vec2 { x: 0f64, y: 0f64 }
     }
 
     pub fn dot(&self, o: &Vec2) -> f64 {
@@ -293,8 +280,8 @@ impl Vec2 {
         }
     }
 
-    pub fn read(&mut self, s: &mut Stream) {
-        self.x = s.read(&0f32) as f64;
-        self.y = s.read(&0f32) as f64;
-    }
+    // pub fn read(&mut self, s: &mut Stream) {
+    //     self.x = s.read(&0f32) as f64;
+    //     self.y = s.read(&0f32) as f64;
+    // }
 }

@@ -6,10 +6,14 @@ extern crate num_cpus;
 extern crate rand;
 extern crate winit;
 
+pub mod math;
 pub mod render;
 
 use render::engine::CpuEngine;
 use render::engine::Data as EngineData;
+use render::vertex::Vertex;
+use math::vector::{Vec2, Vec3};
+use math::triangle::Triangle;
 
 use conrod::backend::glium::glium;
 use conrod::backend::glium::glium::Surface;
@@ -84,11 +88,52 @@ pub fn main() {
     // The `WidgetId` for our background and `Image` widgets.
     widget_ids!(struct Ids { background, rust_logo });
     let ids = Ids::new(ui.widget_id_generator());
-
-    // Create our `conrod::image::Map` which describes each of our widget->image mappings.
-    // In our case we only have one image, however the macro may be used to list multiple.
+    let vertices = vec![
+        Vertex {
+            ps: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            nr: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 1.0,
+            },
+            uv: Vec2 { x: 0.0, y: 0.0 },
+        },
+        Vertex {
+            ps: Vec3 {
+                x: 0.5,
+                y: 1.0,
+                z: 0.0,
+            },
+            nr: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 1.0,
+            },
+            uv: Vec2 { x: 0.0, y: 0.0 },
+        },
+        Vertex {
+            ps: Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            nr: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 1.0,
+            },
+            uv: Vec2 { x: 0.0, y: 0.0 },
+        },
+    ];
+    let triangles = vec![Triangle::new(&[0, 1, 2], &vertices)];
     let data = EngineData {
         view_port_dimension: (WIDTH - 100, HEIGHT - 100),
+        triangles: triangles,
+        vertices: vertices,
     };
     let engine = CpuEngine::new(data);
     let rust_logo = load_rust_logo(&display, &engine);
@@ -153,8 +198,7 @@ pub fn main() {
 fn load_rust_logo(display: &glium::Display, engine: &CpuEngine) -> glium::texture::Texture2d {
     let image_dimensions = engine.data.read().unwrap().view_port_dimension;
     let image_data = engine.render();
-    let raw_image =
-        glium::texture::RawImage2d::from_raw_rgba_reversed(&image_data, image_dimensions);
+    let raw_image = glium::texture::RawImage2d::from_raw_rgba(image_data, image_dimensions);
     let texture = glium::texture::Texture2d::new(display, raw_image).unwrap();
     texture
 }

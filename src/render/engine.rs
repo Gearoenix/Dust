@@ -1,9 +1,13 @@
 use std::sync::{Arc, RwLock};
 use super::kernel::Kernel;
+use super::super::math::triangle::Triangle;
+use super::vertex::Vertex;
 use num_cpus;
 
 pub struct Data {
     pub view_port_dimension: (u32, u32),
+    pub triangles: Vec<Triangle>,
+    pub vertices: Vec<Vertex>,
 }
 
 pub struct CpuEngine {
