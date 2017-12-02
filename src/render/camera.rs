@@ -1,11 +1,14 @@
 use super::super::math::ray::Ray3;
 use super::super::math::vector::Vec3;
 
-pub trait Camera: Sync + Send {
+use std::fmt::Debug;
+
+pub trait Camera: Sync + Send + Debug {
     fn rotate_localy(&mut self, d: f64, v: &Vec3);
     fn get_ray(&self, x: f64, y: f64) -> Ray3;
 }
 
+#[derive(Debug)]
 pub struct Base {
     screen_ratio: f64,
     location: Vec3,
@@ -32,6 +35,7 @@ impl Base {
     }
 }
 
+#[derive(Debug)]
 pub struct OrthoCamera {
     base: Base,
 }
@@ -56,6 +60,7 @@ impl Camera for OrthoCamera {
     }
 }
 
+#[derive(Debug)]
 pub struct PerspectiveCamera {
     base: Base,
 }
@@ -76,6 +81,8 @@ impl Camera for PerspectiveCamera {
     fn get_ray(&self, x: f64, y: f64) -> Ray3 {
         let screen_point = &(&(&self.base.screen_x_axis * (x * self.base.screen_ratio)) +
             &(&self.base.screen_y_axis * y)) + &self.base.screen_z_axis;
-        Ray3::new(&screen_point, &(&screen_point - &self.base.location).normalized())
+        let screen_point = screen_point.normalized();
+        println!("{:?}", screen_point);
+        Ray3::new(&self.base.location, &screen_point.normalized())
     }
 }

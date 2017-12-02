@@ -92,8 +92,8 @@ pub fn main() {
     let vertices = vec![
         Vertex {
             ps: Vec3 {
-                x: 0.0,
-                y: 0.0,
+                x: -1.0,
+                y: -1.0,
                 z: 0.0,
             },
             nr: Vec3 {
@@ -105,7 +105,7 @@ pub fn main() {
         },
         Vertex {
             ps: Vec3 {
-                x: 0.5,
+                x: 0.0,
                 y: 1.0,
                 z: 0.0,
             },
@@ -119,7 +119,7 @@ pub fn main() {
         Vertex {
             ps: Vec3 {
                 x: 1.0,
-                y: 0.0,
+                y: -1.0,
                 z: 0.0,
             },
             nr: Vec3 {
@@ -139,7 +139,7 @@ pub fn main() {
             &Vec3 {
                 x: 0.0,
                 y: 0.0,
-                z: 1.0,
+                z: 2.0,
             },
             &Vec3 {
                 x: 0.0,
@@ -154,6 +154,8 @@ pub fn main() {
             1.7
         )))],
     };
+    // let ray = data.triangles[0].intersect(&data.cameras[0].get_ray(0.0, 0.0), 9000.0, &data.vertices);
+    // panic!("{:?}", ray);
     let engine = CpuEngine::new(data);
     let rust_logo = load_rust_logo(&display, &engine);
     let (w, h) = (rust_logo.get_width(), rust_logo.get_height().unwrap());

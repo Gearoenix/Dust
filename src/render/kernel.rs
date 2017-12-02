@@ -2,8 +2,6 @@ use std::thread::spawn;
 use std::sync::{Arc, RwLock};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use super::engine::Data;
-use super::super::math::ray::Ray3;
-use super::super::math::vector::Vec3;
 use num_cpus;
 
 pub struct Kernel {
@@ -59,26 +57,15 @@ impl Kernel {
             let mut bitmap_index = 0;
             for i in starting_row..ending_row {
                 for j in 0..data.view_port_dimension.0 {
-                    let x = j as f64 / data.view_port_dimension.0 as f64;
-                    let y = i as f64 / data.view_port_dimension.1 as f64;
-                    let o = Vec3 { x: x, y: y, z: 1.0 };
-                    let d = Vec3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: -1.0,
-                    };
-                    let ray = Ray3::new(&o, &d);
+                    let x = (j as f64 / data.view_port_dimension.0 as f64 - 0.5) * 5.0;
+                    let y = (i as f64 / data.view_port_dimension.1 as f64 - 0.5) * 5.0;
+                    let ray = data.cameras[0].get_ray(x, y);
                     let r = data.triangles[0].intersect(&ray, 90000.0, &data.vertices);
                     if let Some(_) = r {
                         bitmap[bitmap_index] = 100;
                         bitmap[bitmap_index + 1] = 30;
                         bitmap[bitmap_index + 2] = 130;
                     }
-                    // if x * x + y * y > 0.125 {
-                    //     bitmap[bitmap_index] = 100;
-                    //     bitmap[bitmap_index + 1] = 30;
-                    //     bitmap[bitmap_index + 2] = 130;
-                    // }
                     bitmap_index += 4;
                 }
             }
