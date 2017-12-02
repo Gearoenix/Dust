@@ -9,6 +9,7 @@ extern crate winit;
 pub mod math;
 pub mod render;
 
+use render::camera::{Base,PerspectiveCamera};
 use render::engine::CpuEngine;
 use render::engine::Data as EngineData;
 use render::vertex::Vertex;
@@ -134,6 +135,24 @@ pub fn main() {
         view_port_dimension: (WIDTH - 100, HEIGHT - 100),
         triangles: triangles,
         vertices: vertices,
+        cameras: vec![Box::new(PerspectiveCamera::new(Base::new(
+            &Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 1.0,
+            },
+            &Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            &Vec3 {
+                x: 0.0,
+                y: 1.0,
+                z: 0.0,
+            },
+            1.7
+        )))],
     };
     let engine = CpuEngine::new(data);
     let rust_logo = load_rust_logo(&display, &engine);

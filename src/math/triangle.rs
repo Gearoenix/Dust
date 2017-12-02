@@ -14,8 +14,8 @@ impl Triangle {
     pub fn new(inds: &[usize; 3], vertices: &Vec<Vertex>) -> Triangle {
         Triangle {
             edg: [
-                vertices[inds[1]].ps - vertices[inds[0]].ps,
-                vertices[inds[2]].ps - vertices[inds[0]].ps,
+                &vertices[inds[1]].ps - &vertices[inds[0]].ps,
+                &vertices[inds[2]].ps - &vertices[inds[0]].ps,
             ],
             ind: [inds[0], inds[1], inds[2]],
             tedg: [
@@ -45,7 +45,8 @@ impl Triangle {
     // }
 
     pub fn get_midpoint(&self, vertices: &Vec<Vertex>) -> Vec3 {
-        (vertices[self.ind[0]].ps + vertices[self.ind[1]].ps + vertices[self.ind[2]].ps) / 3f64
+        &(&(&vertices[self.ind[0]].ps + &vertices[self.ind[1]].ps) + &vertices[self.ind[2]].ps)
+            / 3f64
     }
 
     pub fn intersect(
@@ -60,7 +61,7 @@ impl Triangle {
             return None;
         }
         let inv_det = 1f64 / det;
-        let tvec = r.o - vertices[self.ind[0]].ps;
+        let tvec = &r.o - &vertices[self.ind[0]].ps;
         let u = tvec.dot(&pvec) * inv_det;
         if u < 0f64 || u > 1f64 {
             return None;
@@ -80,7 +81,7 @@ impl Triangle {
     }
 
     pub fn barycentric(&self, p: &Vec3, vertices: &Vec<Vertex>) -> Vec3 {
-        let v2_ = *p - vertices[self.ind[0]].ps;
+        let v2_ = p - &vertices[self.ind[0]].ps;
         let d00 = self.edg[0].dot(&self.edg[0]);
         let d01 = self.edg[0].dot(&self.edg[1]);
         let d11 = self.edg[1].dot(&self.edg[1]);
