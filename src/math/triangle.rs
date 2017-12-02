@@ -60,27 +60,23 @@ impl Triangle {
         if det < 0.000001 && det > -0.000001 {
             return None;
         }
-        println!("Reach1");
         let inv_det = 1f64 / det;
         let tvec = &r.o - &vertices[self.ind[0]].ps;
         let u = tvec.dot(&pvec) * inv_det;
         if u < 0f64 || u > 1f64 {
             return None;
         }
-        println!("Reach2");
         let qvec = tvec.cross(&self.edg[0]);
         let v = r.d.dot(&qvec) * inv_det;
         if v < 0f64 || u + v > 1f64 {
             return None;
         }
-        println!("Reach3");
         let t = self.edg[1].dot(&qvec) * inv_det; // Set distance along ray to intersection
         if t < tmin {
             if t > 1e-9 {
                 return Some((t, u, v));
             }
         }
-        println!("Reach4");
         None
     }
 

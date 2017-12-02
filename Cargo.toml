@@ -11,3 +11,7 @@ glium = "*"
 image = "*"
 rand = "*"
 num_cpus = "*"
+
+[profile.release]
+opt-level = 3
+lto = true

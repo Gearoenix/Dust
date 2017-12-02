@@ -22,9 +22,9 @@ impl Base {
         let screen_z_axis = (target - location).normalized();
         let screen_x_axis = screen_z_axis.cross(up).normalized();
         let screen_y_axis = screen_x_axis.cross(&screen_z_axis).normalized();
-        println!("screen_x_axis: {:?},\nscreen_y_axis: {:?},\nscreen_z_axis: {:?}",
-            screen_x_axis, screen_y_axis, screen_z_axis,
-        );
+        // println!("screen_x_axis: {:?},\nscreen_y_axis: {:?},\nscreen_z_axis: {:?}",
+        //     screen_x_axis, screen_y_axis, screen_z_axis,
+        // );
         Base {
             screen_ratio: screen_ratio,
             location: *location,
@@ -82,7 +82,6 @@ impl Camera for PerspectiveCamera {
         let screen_point = &(&(&self.base.screen_x_axis * (x * self.base.screen_ratio)) +
             &(&self.base.screen_y_axis * y)) + &self.base.screen_z_axis;
         let screen_point = screen_point.normalized();
-        println!("{:?}", screen_point);
         Ray3::new(&self.base.location, &screen_point.normalized())
     }
 }

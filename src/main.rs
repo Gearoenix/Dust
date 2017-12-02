@@ -66,8 +66,8 @@ impl EventLoop {
 }
 
 pub fn main() {
-    const WIDTH: u32 = 1000;
-    const HEIGHT: u32 = 800;
+    const WIDTH: u32 = 1300;
+    const HEIGHT: u32 = 900;
 
     // Build the window.
     let mut events_loop = glium::glutin::EventsLoop::new();
@@ -85,7 +85,7 @@ pub fn main() {
     // A type used for converting `conrod::render::Primitives` into `Command`s that can be used
     // for drawing to the glium `Surface`.
     let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-
+    println!("number of cpu {:?}", num_cpus::get());
     // The `WidgetId` for our background and `Image` widgets.
     widget_ids!(struct Ids { background, rust_logo });
     let ids = Ids::new(ui.widget_id_generator());
@@ -187,6 +187,7 @@ pub fn main() {
                     } => break 'main,
                     _ => (),
                 },
+
                 _ => (),
             }
         }
