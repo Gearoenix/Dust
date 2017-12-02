@@ -1,19 +1,11 @@
 use std::ops::{
-    Add,
-    Sub,
     Mul,
-    Div,
-    AddAssign,
-    SubAssign,
     MulAssign,
-    DivAssign
 };
 
-use ::math::vector::{
-    Vec2,
+use super::vector::{
     Vec3,
 };
-use ::io::file::Stream;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat4x4 {
@@ -78,14 +70,6 @@ impl Mat4x4 {
             ],
         }
     }
-
-    pub fn read(&mut self, s: &mut Stream) {
-        for i in 0..4 {
-            for j in 0..4 {
-                self.data[j][i] = s.read(&0f32) as f64;
-            }
-        }
-    }
 }
 
 impl Mul<Vec3> for Mat4x4 {
@@ -112,5 +96,23 @@ impl Mul<Mat4x4> for Mat4x4 {
             }
         }
         m
+    }
+}
+impl<'a> MulAssign<&'a Mat4x4> for Mat4x4 {
+    fn mul_assign(&mut self, o: &'a Mat4x4) {
+        let mut m = Mat4x4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                m.data[i][j] = 0.0;
+                for k in 0..4 {
+                    m.data[i][j] += self.data[i][k] * o.data[k][j];
+                }
+            }
+        }
+        for i in 0..4 {
+            for j in 0..4 {
+                self.data[i][j] = m.data[i][j];
+            }
+        }
     }
 }
