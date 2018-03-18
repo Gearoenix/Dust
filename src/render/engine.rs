@@ -7,6 +7,7 @@ use num_cpus;
 
 pub struct Data {
     pub view_port_dimension: (u32, u32),
+    pub samples: u8,
     pub triangles: Vec<Triangle>,
     pub vertices: Vec<Vertex>,
     pub cameras: Vec<Box<Camera>>,

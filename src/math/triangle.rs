@@ -57,7 +57,7 @@ impl Triangle {
     ) -> Option<(f64, f64, f64)> {
         let pvec = r.d.cross(&self.edg[1]);
         let det = self.edg[0].dot(&pvec);
-        if det < 0.000001 && det > -0.000001 {
+        if det == 0.0 {
             return None;
         }
         let inv_det = 1f64 / det;
@@ -73,7 +73,7 @@ impl Triangle {
         }
         let t = self.edg[1].dot(&qvec) * inv_det; // Set distance along ray to intersection
         if t < tmin {
-            if t > 1e-9 {
+            if t > 0.0 {
                 return Some((t, u, v));
             }
         }

@@ -133,6 +133,7 @@ pub fn main() {
     let triangles = vec![Triangle::new(&[0, 1, 2], &vertices)];
     let data = EngineData {
         view_port_dimension: (WIDTH - 100, HEIGHT - 100),
+        samples: 2,
         triangles: triangles,
         vertices: vertices,
         cameras: vec![Box::new(PerspectiveCamera::new(Base::new(
