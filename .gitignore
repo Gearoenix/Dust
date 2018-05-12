@@ -5,5 +5,7 @@
 *.dll
 *.bk
 *.exe
+*.png
+*.jpg
 /target/
 Cargo.lock
