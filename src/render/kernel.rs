@@ -1,8 +1,8 @@
-use std::thread::spawn;
-use std::sync::{Arc, RwLock};
-use std::sync::mpsc::{channel, Receiver, Sender};
 use super::engine::Data;
 use num_cpus;
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::{Arc, RwLock};
+use std::thread::spawn;
 
 pub struct Kernel {
     run_signal: Sender<bool>,
@@ -58,12 +58,16 @@ impl Kernel {
             for i in starting_row..ending_row {
                 for j in 0..data.view_port_dimension.0 {
                     let mut samples = [0u64; 3];
-                    // let samples_count = data.samples as i64;
-                    let samples_count = 8i64;
-                    for si in -samples_count..samples_count {
-                        for sj in -samples_count..samples_count {
-                            let x = (((j as f64 + (si as f64 / (samples_count as f64 * 2.0))) / data.view_port_dimension.0 as f64) - 0.5) * 1.0; // todo 2
-                            let y = (((i as f64 + (sj as f64 / (samples_count as f64 * 2.0))) / data.view_port_dimension.1 as f64) - 0.5) * 1.0;
+                    let samples_count = data.samples as i64;
+                    // let samples_count = 8i64;
+                    for si in -samples_count..samples_count + 1 {
+                        for sj in -samples_count..samples_count + 1 {
+                            let x = (((j as f64 + (si as f64 / (samples_count as f64 * 2.0)))
+                                / data.view_port_dimension.0 as f64)
+                                - 0.5) * 1.0; // todo 2
+                            let y = (((i as f64 + (sj as f64 / (samples_count as f64 * 2.0)))
+                                / data.view_port_dimension.1 as f64)
+                                - 0.5) * 1.0;
                             let ray = data.cameras[0].get_ray(x, y);
                             let r = data.triangles[0].intersect(&ray, 90000.0, &data.vertices);
                             if let Some(_) = r {
@@ -73,9 +77,12 @@ impl Kernel {
                             }
                         }
                     }
-                    bitmap[bitmap_index] = (samples[0] / (samples_count as u64 * samples_count as u64 * 4)) as u8;
-                    bitmap[bitmap_index + 1] = (samples[1] / (samples_count as u64 * samples_count as u64 * 4) as u64) as u8;
-                    bitmap[bitmap_index + 2] = (samples[2] / (samples_count as u64 * samples_count as u64 * 4) as u64) as u8;
+                    bitmap[bitmap_index] =
+                        (samples[0] / (samples_count * samples_count * 4) as u64) as u8;
+                    bitmap[bitmap_index + 1] =
+                        (samples[1] / (samples_count * samples_count * 4) as u64) as u8;
+                    bitmap[bitmap_index + 2] =
+                        (samples[2] / (samples_count * samples_count * 4) as u64) as u8;
                     bitmap_index += 4;
                 }
             }

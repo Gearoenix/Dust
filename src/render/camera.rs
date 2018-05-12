@@ -42,9 +42,7 @@ pub struct OrthoCamera {
 
 impl OrthoCamera {
     pub fn new(base: Base) -> OrthoCamera {
-        OrthoCamera {
-            base: base,
-        }
+        OrthoCamera { base: base }
     }
 }
 
@@ -54,8 +52,8 @@ impl Camera for OrthoCamera {
     }
 
     fn get_ray(&self, x: f64, y: f64) -> Ray3 {
-        let screen_point = &(&self.base.screen_x_axis * (x * self.base.screen_ratio)) +
-            &(&self.base.screen_y_axis * y);
+        let screen_point = &(&self.base.screen_x_axis * (x * self.base.screen_ratio))
+            + &(&self.base.screen_y_axis * y);
         Ray3::new(&screen_point, &self.base.screen_z_axis)
     }
 }
@@ -67,9 +65,7 @@ pub struct PerspectiveCamera {
 
 impl PerspectiveCamera {
     pub fn new(base: Base) -> Self {
-        PerspectiveCamera {
-            base: base,
-        }
+        PerspectiveCamera { base: base }
     }
 }
 
@@ -79,9 +75,10 @@ impl Camera for PerspectiveCamera {
     }
 
     fn get_ray(&self, x: f64, y: f64) -> Ray3 {
-        let screen_point = &(&(&self.base.screen_x_axis * (x * self.base.screen_ratio)) +
-            &(&self.base.screen_y_axis * y)) + &self.base.screen_z_axis;
-        let screen_point = screen_point.normalized();
-        Ray3::new(&self.base.location, &screen_point.normalized())
+        let screen_point = &(&(&self.base.screen_x_axis * (x * self.base.screen_ratio))
+            + &(&self.base.screen_y_axis * y))
+            + &self.base.screen_z_axis;
+        // let screen_point = screen_point.normalized();
+        Ray3::new(&self.base.location, &screen_point)
     }
 }

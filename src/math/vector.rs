@@ -16,10 +16,14 @@ pub struct Vec3 {
     pub z: f64,
 }
 
-macro_rules! as_expr { ($e:expr) => {$e} }
+macro_rules! as_expr {
+    ($e:expr) => {
+        $e
+    };
+}
 
 macro_rules! op3 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl<'a, 'b> $tra<&'b Vec3> for &'a Vec3 {
             type Output = Vec3;
             fn $func(self, other: &'b Vec3) -> Vec3 {
@@ -30,7 +34,7 @@ macro_rules! op3 {
                 }
             }
         }
-    )
+    };
 }
 
 op3!(add, Add, +);
@@ -39,7 +43,7 @@ op3!(mul, Mul, *);
 op3!(div, Div, /);
 
 macro_rules! sop3 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl<'a> $tra<f64> for &'a Vec3 {
             type Output = Vec3;
             fn $func(self, other: f64) -> Vec3 {
@@ -50,7 +54,7 @@ macro_rules! sop3 {
                 }
             }
         }
-    )
+    };
 }
 
 sop3!(add, Add, +);
@@ -59,7 +63,7 @@ sop3!(mul, Mul, *);
 sop3!(div, Div, /);
 
 macro_rules! opasg3 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl<'a> $tra<&'a Vec3> for Vec3 {
             fn $func(&mut self, other: &'a Vec3) {
                 as_expr!(self.x $opt other.x);
@@ -67,7 +71,7 @@ macro_rules! opasg3 {
                 as_expr!(self.z $opt other.z);
             }
         }
-    )
+    };
 }
 
 opasg3!(add_assign, AddAssign, +=);
@@ -76,7 +80,7 @@ opasg3!(mul_assign, MulAssign, *=);
 opasg3!(div_assign, DivAssign, /=);
 
 macro_rules! sopasg3 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl $tra<f64> for Vec3 {
             fn $func(&mut self, other: f64) {
                 as_expr!(self.x $opt other);
@@ -84,7 +88,7 @@ macro_rules! sopasg3 {
                 as_expr!(self.z $opt other);
             }
         }
-    )
+    };
 }
 
 sopasg3!(add_assign, AddAssign, +=);
@@ -166,7 +170,7 @@ pub struct Vec2 {
 }
 
 macro_rules! op2 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl $tra for Vec2 {
             type Output = Vec2;
             fn $func(self, other: Vec2) -> Vec2 {
@@ -176,11 +180,11 @@ macro_rules! op2 {
                 }
             }
         }
-    )
+    };
 }
 
 macro_rules! sop2 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl $tra<f64> for Vec2 {
             type Output = Vec2;
             fn $func(self, other: f64) -> Vec2 {
@@ -190,29 +194,29 @@ macro_rules! sop2 {
                 }
             }
         }
-    )
+    };
 }
 
 macro_rules! opasg2 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl $tra for Vec2 {
             fn $func(&mut self, other: Vec2) {
                 as_expr!(self.x $opt other.x);
                 as_expr!(self.y $opt other.y);
             }
         }
-    )
+    };
 }
 
 macro_rules! sopasg2 {
-    ($func:ident, $tra:ident, $opt:tt) => (
+    ($func:ident, $tra:ident, $opt:tt) => {
         impl $tra<f64> for Vec2 {
             fn $func(&mut self, other: f64) {
                 as_expr!(self.x $opt other);
                 as_expr!(self.y $opt other);
             }
         }
-    )
+    };
 }
 
 op2!(add, Add, +);

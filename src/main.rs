@@ -9,12 +9,12 @@ extern crate winit;
 pub mod math;
 pub mod render;
 
-use render::camera::{Base,PerspectiveCamera};
+use math::triangle::Triangle;
+use math::vector::{Vec2, Vec3};
+use render::camera::{Base, PerspectiveCamera};
 use render::engine::CpuEngine;
 use render::engine::Data as EngineData;
 use render::vertex::Vertex;
-use math::vector::{Vec2, Vec3};
-use math::triangle::Triangle;
 
 use conrod::backend::glium::glium;
 use conrod::backend::glium::glium::Surface;
@@ -133,7 +133,7 @@ pub fn main() {
     let triangles = vec![Triangle::new(&[0, 1, 2], &vertices)];
     let data = EngineData {
         view_port_dimension: (WIDTH - 100, HEIGHT - 100),
-        samples: 2,
+        samples: 1,
         triangles: triangles,
         vertices: vertices,
         cameras: vec![Box::new(PerspectiveCamera::new(Base::new(
@@ -152,7 +152,7 @@ pub fn main() {
                 y: 1.0,
                 z: 0.0,
             },
-            1.7
+            1.7,
         )))],
     };
     // let ray = data.triangles[0].intersect(&data.cameras[0].get_ray(0.0, 0.0), 9000.0, &data.vertices);

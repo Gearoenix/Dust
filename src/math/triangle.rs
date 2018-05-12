@@ -1,7 +1,7 @@
 use super::vector::{Vec2, Vec3};
 // use ::math::aabbox::AABBox3;
-use super::ray::Ray3;
 use super::super::render::vertex::Vertex;
+use super::ray::Ray3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle {
@@ -63,12 +63,12 @@ impl Triangle {
         let inv_det = 1f64 / det;
         let tvec = &r.o - &vertices[self.ind[0]].ps;
         let u = tvec.dot(&pvec) * inv_det;
-        if u < 0.0001f64 || u > 0.999f64 {
+        if u < 0.0001f64 || u > 0.9999f64 {
             return None;
         }
         let qvec = tvec.cross(&self.edg[0]);
         let v = r.d.dot(&qvec) * inv_det;
-        if v < 0.0001f64 || u + v > 0.999f64 {
+        if v < 0.0001f64 || u + v > 0.9999f64 {
             return None;
         }
         let t = self.edg[1].dot(&qvec) * inv_det; // Set distance along ray to intersection

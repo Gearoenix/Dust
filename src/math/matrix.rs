@@ -1,11 +1,6 @@
-use std::ops::{
-    Mul,
-    MulAssign,
-};
+use std::ops::{Mul, MulAssign};
 
-use super::vector::{
-    Vec3,
-};
+use super::vector::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat4x4 {
@@ -26,47 +21,42 @@ impl Mat4x4 {
 
     pub fn rotation_transform(d: f64, v: &Vec3) -> Mat4x4 {
         let sinus: f64 = d.sin();
-		let cosinus: f64 = d.cos();
-		let oneminuscos = 1f64 - cosinus;
-		let w = v;
-		let wx2 = w.x * w.x;
-		let wxy = w.x * w.y;
-		let wxz = w.x * w.z;
-		let wy2 = w.y * w.y;
-		let wyz = w.y * w.z;
-		let wz2 = w.z * w.z;
-		let wxyonemincos = wxy * oneminuscos;
-		let wxzonemincos = wxz * oneminuscos;
-		let wyzonemincos = wyz * oneminuscos;
-		let wxsin = w.x * sinus;
-		let wysin = w.y * sinus;
-		let wzsin = w.z * sinus;
-		Mat4x4 {
+        let cosinus: f64 = d.cos();
+        let oneminuscos = 1f64 - cosinus;
+        let w = v;
+        let wx2 = w.x * w.x;
+        let wxy = w.x * w.y;
+        let wxz = w.x * w.z;
+        let wy2 = w.y * w.y;
+        let wyz = w.y * w.z;
+        let wz2 = w.z * w.z;
+        let wxyonemincos = wxy * oneminuscos;
+        let wxzonemincos = wxz * oneminuscos;
+        let wyzonemincos = wyz * oneminuscos;
+        let wxsin = w.x * sinus;
+        let wysin = w.y * sinus;
+        let wzsin = w.z * sinus;
+        Mat4x4 {
             data: [
-    		    [
+                [
                     cosinus + (wx2 * oneminuscos),
                     wxyonemincos - wzsin,
                     wysin + wxzonemincos,
                     0.0,
                 ],
-    		    [
+                [
                     wzsin + wxyonemincos,
                     cosinus + (wy2 * oneminuscos),
                     wyzonemincos - wxsin,
                     0.0,
                 ],
-    		    [
+                [
                     wxzonemincos - wysin,
                     wxsin + wyzonemincos,
                     cosinus + (wz2 * oneminuscos),
                     0.0,
                 ],
-    		    [
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                ],
+                [0.0, 0.0, 0.0, 1.0],
             ],
         }
     }
@@ -76,9 +66,12 @@ impl Mul<Vec3> for Mat4x4 {
     type Output = Vec3;
     fn mul(self, o: Vec3) -> Vec3 {
         Vec3 {
-            x: self.data[0][0] * o.x + self.data[0][1] * o.y + self.data[0][2] * o.z + self.data[0][3],
-            y: self.data[1][0] * o.x + self.data[1][1] * o.y + self.data[1][2] * o.z + self.data[1][3],
-            z: self.data[2][0] * o.x + self.data[2][1] * o.y + self.data[2][2] * o.z + self.data[2][3],
+            x: self.data[0][0] * o.x + self.data[0][1] * o.y + self.data[0][2] * o.z
+                + self.data[0][3],
+            y: self.data[1][0] * o.x + self.data[1][1] * o.y + self.data[1][2] * o.z
+                + self.data[1][3],
+            z: self.data[2][0] * o.x + self.data[2][1] * o.y + self.data[2][2] * o.z
+                + self.data[2][3],
         }
     }
 }
