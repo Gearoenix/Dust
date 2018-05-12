@@ -1,17 +1,8 @@
 [package]
-name = "dust"
-version = "0.0.1"
-authors = ["Hossein Noroozpour Thany Abady"]
+name = "dusttest"
+version = "0.1.0"
+authors = ["Hossein Noroozpour <hossein.noroozpour@gmail.com>"]
 
 [dependencies]
-conrod = { version = "*", features = ["winit", "glium"] }
-find_folder = "*"
-winit = "*"
-glium = "*"
+cgmath = "*"
 image = "*"
-rand = "*"
-num_cpus = "*"
-
-[profile.release]
-opt-level = 3
-lto = true
