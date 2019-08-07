@@ -1,4 +1,6 @@
-pub mod camera;
-pub mod engine;
-pub mod kernel;
-pub mod vertex;
+// pub mod camera;
+// pub mod engine;
+pub mod hit;
+// pub mod kernel;
+pub mod material;
+// pub mod vertex;

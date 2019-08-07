@@ -1,4 +1,5 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use rand::{thread_rng, Rng};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -102,14 +103,14 @@ impl Vec3 {
     }
 
     pub fn length(&self) -> f64 {
-        ((self.x * self.x) + (self.y * self.y) + (self.z * self.z)).sqrt()
+        self.squared_length().sqrt()
     }
 
     pub fn absolute_length(&self) -> f64 {
         self.x.abs() + self.y.abs() + self.z.abs()
     }
 
-    pub fn square_length(&self) -> f64 {
+    pub fn squared_length(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
@@ -126,6 +127,34 @@ impl Vec3 {
             x: self.x / len,
             y: self.y / len,
             z: self.z / len,
+        }
+    }
+
+    pub fn refract(&self, n: &Vec3, ni_over_nt: f64) -> Option<Self> {
+        let uv = self.normalized();
+        let dt = uv.dot(n);
+        let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
+        if discriminant > 0.0 {
+            return Some(&(&(&uv - &(n * dt)) * ni_over_nt) - &(n * discriminant.sqrt()));
+        }
+        None
+    }
+
+    pub fn reflect(&self, n: &Vec3) -> Self {
+        return self - &(n * (2.0 * self.dot(n)));
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        let mut rng = thread_rng();
+        loop {
+            let p = Self {
+                x: rng.gen_range(-1.0f64, 1.0f64),
+                y: rng.gen_range(-1.0f64, 1.0f64),
+                z: rng.gen_range(-1.0f64, 1.0f64),
+            };
+            if p.squared_length() < 1.0 {
+                return p;
+            }
         }
     }
 }
